@@ -1,4 +1,4 @@
-package java.graduation.project.DoDutch_server.global.common.exception;
+package graduation.project.DoDutch_server.global.common.exception;
 
 import org.springframework.http.HttpStatus;
 

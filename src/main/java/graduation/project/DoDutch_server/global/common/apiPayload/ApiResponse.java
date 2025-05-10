@@ -1,4 +1,4 @@
-package java.graduation.project.DoDutch_server.global.common.apiPayload;
+package graduation.project.DoDutch_server.global.common.apiPayload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.BaseCode;
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.status.SuccessStatus;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.BaseCode;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.status.SuccessStatus;
 
 @Getter
 @NoArgsConstructor

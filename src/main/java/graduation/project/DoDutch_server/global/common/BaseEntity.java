@@ -1,4 +1,4 @@
-package java.graduation.project.DoDutch_server.global.common;
+package graduation.project.DoDutch_server.global.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

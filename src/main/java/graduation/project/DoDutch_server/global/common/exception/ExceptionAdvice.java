@@ -1,9 +1,9 @@
-package java.graduation.project.DoDutch_server.global.common.exception;
+package graduation.project.DoDutch_server.global.common.exception;
 
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
-import java.graduation.project.DoDutch_server.global.common.exception.GeneralException;
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
-import java.graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
+import graduation.project.DoDutch_server.global.common.exception.GeneralException;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
+import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

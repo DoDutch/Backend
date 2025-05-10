@@ -1,10 +1,10 @@
-package java.graduation.project.DoDutch_server.global.common.exception;
+package graduation.project.DoDutch_server.global.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
 
 @Getter
 @AllArgsConstructor
