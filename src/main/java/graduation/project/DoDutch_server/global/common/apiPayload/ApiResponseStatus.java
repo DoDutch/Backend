@@ -1,4 +1,4 @@
-package java.graduation.project.DoDutch_server.global.common.apiPayload;
+package graduation.project.DoDutch_server.global.common.apiPayload;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

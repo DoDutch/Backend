@@ -1,11 +1,11 @@
-package java.graduation.project.DoDutch_server.global.common;
+package graduation.project.DoDutch_server.global.common;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ResponseDTO {
+public class ResponseDTO<T> {
     private boolean isSuccess;
     private String code;
     private String message;

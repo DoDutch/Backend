@@ -1,11 +1,11 @@
-package java.graduation.project.DoDutch_server.global.common.apiPayload.code.status;
+package graduation.project.DoDutch_server.global.common.apiPayload.code.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.dto.ErrorReasonDTO;
 
 @Getter
 @AllArgsConstructor

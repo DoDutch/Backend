@@ -1,7 +1,7 @@
-package java.graduation.project.DoDutch_server.global.common.exception.handler;
+package graduation.project.DoDutch_server.global.common.exception.handler;
 
-import java.graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
-import java.graduation.project.DoDutch_server.global.common.exception.GeneralException;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.BaseErrorCode;
+import graduation.project.DoDutch_server.global.common.exception.GeneralException;
 
 public class ErrorHandler extends GeneralException {
     public ErrorHandler(BaseErrorCode errorCode) {

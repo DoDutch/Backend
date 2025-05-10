@@ -1,4 +1,4 @@
-package java.graduation.project.DoDutch_server.global.common.apiPayload.code.dto;
+package graduation.project.DoDutch_server.global.common.apiPayload.code.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
