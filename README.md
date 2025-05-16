@@ -14,4 +14,6 @@ commit message는 `[Type] 작성 내용` 으로 통일하기
 - [Environment] : 개발 환경 세팅 시
 - [!HOTFIX] : 급하게 치명적인 버그를 고쳐야 하는 경우
 
-‼️  PR 규칙 잘 확인하기!!
+### 📋 Issue 및 Branch 생성 Rule
+Issue로 코드 작성 관련 설명 작성 후, Issue Branch 생성하고 작업하기
+참고 자료 🔗 https://codesyun.tistory.com/entry/Git-Issue-%EB%B0%8F-Issue-Branch-%EC%83%9D%EC%84%B1%ED%95%98%EC%97%AC-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0
