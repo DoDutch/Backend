@@ -7,15 +7,15 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Builder
-public class TripResponseDTO {
-    private String tripImageUrl;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private String name;
-    private String place;
-    private String joinCode;
+public class TripExpenseDTO {
+    private Long expenseId;
+    private String photoUrl;
+    private LocalDate expenseDate;
+    private String title;
+    private Integer amount;
+    private String memo;
 }
