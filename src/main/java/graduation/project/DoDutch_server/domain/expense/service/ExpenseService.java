@@ -1,0 +1,76 @@
+package graduation.project.DoDutch_server.domain.expense.service;
+
+import graduation.project.DoDutch_server.domain.expense.converter.ExpenseConverter;
+import graduation.project.DoDutch_server.domain.expense.dto.ExpenseListReponseDto;
+import graduation.project.DoDutch_server.domain.expense.dto.ExpenseSingleResponseDto;
+import graduation.project.DoDutch_server.domain.expense.entity.Expense;
+import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
+import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.trip.entity.Trip;
+import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
+import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
+import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.misc.Triple;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ExpenseService {
+
+    private final TripRepository tripRepository;
+    private final ExpenseRepository expenseRepository;
+    private final TripMemberRepository tripMemberRepository;
+
+
+//    public void addExpense(){
+//
+//    }
+
+    public ExpenseSingleResponseDto getExpensesByTripId(Long tripId){ //전체 여행 지출 조회
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId)); //단일 객체 반환시 필요
+
+        List<Expense> expenses= expenseRepository.findByTripId(tripId); //지출 기록
+
+        int budget = trip.getBudget(); //전체 예산
+        int remainingCost = (trip.getBudget() != null ? trip.getBudget() : 0) -
+                (trip.getTotalCost() != null ? trip.getTotalCost() : 0); //잔여금액
+
+        List<TripMember> tripMembers = tripMemberRepository.findByTripId(tripId);
+
+        List<Member> members = tripMembers.stream() //Member 형태로 변환
+                .map(TripMember::getMember)
+                .collect(Collectors.toList());
+
+        return ExpenseConverter.toDtoSingleWrapperAllExpense(budget,remainingCost,expenses, members);
+
+    }
+
+    public ExpenseListReponseDto getExpensesByTripIdAndDate(Long tripId){ //날짜별 여행 지출 조회
+        List<Expense> expenses= expenseRepository.findByTripId(tripId);
+
+        return ExpenseConverter.toDtoListWrapperAllExpenseByDate(expenses);
+    }
+
+    public ExpenseSingleResponseDto getExpenseByExpenseId(Long tripId, Long expenseId){
+
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지출이 존재하지 않습니다: " +  expenseId));
+
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId));
+
+        String tripName = trip.getName();
+
+        return ExpenseConverter.toDtoSingleWrapperExpenseByExpenseId(expense, tripName);
+
+    }
+
+}
