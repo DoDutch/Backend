@@ -1,7 +1,6 @@
 package graduation.project.DoDutch_server.domain.trip.DTO;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
-import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripExpenseDTO;
@@ -42,11 +41,19 @@ public class TripConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<TripMemberDTO> toMemeberList(List<TripMember> tripMembers){
+    public static List<TripMemberDTO> toMemberList1(List<TripMember> tripMembers){
         return tripMembers.stream()
                 .map(member -> TripMemberDTO.builder()
                         .memberId(member.getMember().getId())
                         .nickName(member.getMember().getNickname())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public static List<TripMemberDTO> toMemberList2(List<TripMember> tripMembers){
+        return tripMembers.stream()
+                .map(member -> TripMemberDTO.builder()
+                        .memberId(member.getMember().getId())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -67,15 +74,30 @@ public class TripConverter {
     public static TripDetailResponseDTO toDetailDto(Trip trip){
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
-                .members(toMemeberList(trip.getTripMembers()))
-                .photos(toExpenseDtoList(trip.getExpenses()))
                 .tripName(trip.getName())
-                .totalCost(trip.getTotalCost())
                 .stratDate(trip.getStartDate())
-                .tripImageUrl(trip.getTripImageUrl())
-                .place(trip.getPlace())
-                .budget(trip.getBudget())
                 .endDate(trip.getEndDate())
+                .place(trip.getPlace())
+                .totalCost(trip.getTotalCost())
+                .budget(trip.getBudget())
+                .tripImageUrl(trip.getTripImageUrl())
+                .members(toMemberList1(trip.getTripMembers()))
+                .photos(toExpenseDtoList(trip.getExpenses()))
                 .build();
+    }
+
+    public static List<TripDetailResponseDTO> toDetailListDto(List<Trip> trips){
+        return trips.stream()
+                .map(trip -> TripDetailResponseDTO.builder()
+                        .tripId(trip.getId())
+                        .tripName(trip.getName())
+                        .stratDate(trip.getStartDate())
+                        .endDate(trip.getEndDate())
+                        .place(trip.getPlace())
+                        .totalCost(trip.getTotalCost())
+                        .budget(trip.getBudget())
+                        .members(toMemberList2(trip.getTripMembers()))
+                        .build())
+                .collect(Collectors.toList());
     }
 }
