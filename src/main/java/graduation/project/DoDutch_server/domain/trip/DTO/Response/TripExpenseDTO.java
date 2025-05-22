@@ -12,10 +12,10 @@ import java.time.LocalDate;
 @Getter
 @Builder
 public class TripExpenseDTO {
-    private Long expenseId;
-    private String photoUrl;
-    private LocalDate expenseDate;
-    private String title;
-    private Integer amount;
-    private String memo;
+    private Long expenseId; // 지출 id
+    private String photoUrl; // 지출 사진 url
+    private LocalDate expenseDate; // 지출 날짜
+    private String title; // 지출 제목
+    private Integer amount; // 지출 금액
+    private String memo; // 메모
 }

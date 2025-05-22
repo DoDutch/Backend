@@ -2,8 +2,6 @@ package graduation.project.DoDutch_server.domain.trip.DTO.Response;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import graduation.project.DoDutch_server.domain.photo.entity.Photo;
-import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

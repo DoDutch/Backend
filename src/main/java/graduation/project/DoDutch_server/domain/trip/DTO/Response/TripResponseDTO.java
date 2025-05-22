@@ -12,10 +12,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class TripResponseDTO {
-    private String tripImageUrl;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private String name;
-    private String place;
-    private String joinCode;
+    private String tripImageUrl; // 여행 대표 이미지 url
+    private LocalDate startDate; // 여행 시작 날짜
+    private LocalDate endDate; // 여행 종료 날짜
+    private String name; // 여행 제목
+    private String place; // 여행 장소
+    private String joinCode; // 여행 참여 코드
 }

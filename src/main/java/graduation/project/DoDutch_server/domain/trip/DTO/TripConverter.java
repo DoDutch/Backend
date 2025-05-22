@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TripConverter {
+    /*
+    Dto를 Entity로 변환
+     */
     public static Trip toEntity(TripRequestDTO tripRequestDTO, String joinCode /* ,String tripImageUrl*/) {
         return Trip.builder()
                 .name(tripRequestDTO.getTripName())
@@ -26,6 +29,9 @@ public class TripConverter {
                 .build();
     }
 
+    /*
+    Entity를 Dto로 변환
+     */
     public static TripResponseDTO toDto(Trip trip){
         return TripResponseDTO.builder()
                 .tripImageUrl(trip.getTripImageUrl())
@@ -37,11 +43,6 @@ public class TripConverter {
                 .build();
     }
 
-    public static List<TripResponseDTO> toDtoList(List<Trip> trips){
-        return trips.stream()
-                .map(TripConverter::toDto)
-                .collect(Collectors.toList());
-    }
 
     public static List<TripMemberDTO> toMemberList1(List<TripMember> tripMembers){
         return tripMembers.stream()
@@ -73,6 +74,9 @@ public class TripConverter {
                 .collect(Collectors.toList());
     }
 
+    /*
+    여행 정보 조회용 dto 변환
+     */
     public static TripDetailResponseDTO toDetailDto(Trip trip){
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
@@ -88,6 +92,9 @@ public class TripConverter {
                 .build();
     }
 
+    /*
+    여행목록 조회용 dto 변환
+     */
     public static List<TripDetailResponseDTO> toDetailListDto(List<Trip> trips){
         return trips.stream()
                 .map(trip -> TripDetailResponseDTO.builder()

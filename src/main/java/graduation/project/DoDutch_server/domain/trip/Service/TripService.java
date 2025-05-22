@@ -8,9 +8,9 @@ import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripResponseDT
 import java.util.List;
 
 public interface TripService {
-    public Long createTrip(TripRequestDTO tripRequestDTO, Long memberId);
-    public void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId);
-    public TripResponseDTO shareTrip(Long tripId);
-    public List<TripDetailResponseDTO> searchTrip(String keyWord);
-    public TripDetailResponseDTO detailTrip(Long tripId);
+    Long createTrip(TripRequestDTO tripRequestDTO, Long memberId);
+    void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId);
+    TripResponseDTO shareTrip(Long tripId);
+    List<TripDetailResponseDTO> searchTrip(String keyWord);
+    TripDetailResponseDTO detailTrip(Long tripId);
 }

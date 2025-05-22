@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class TripJoinRequestDTO {
-    private String joinCode;
+    private String joinCode; // 여행 참여 코드
 }
