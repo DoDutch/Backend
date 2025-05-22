@@ -18,9 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -57,8 +56,7 @@ public class TripServiceImpl implements TripService{
         List<TripMember> tripMemberList = trip.getTripMembers();
 
         //중복된 tripMember 있는지 검사.
-        for (Iterator<TripMember> tripMemberIterator = tripMemberList.iterator(); tripMemberIterator.hasNext();){
-            TripMember tripMember = tripMemberIterator.next();
+        for (TripMember tripMember : tripMemberList) {
             if (member.equals(tripMember.getMember())) throw new ErrorHandler(ErrorStatus.TRIP_MEMBER_EXIST);
         }
 
@@ -75,20 +73,42 @@ public class TripServiceImpl implements TripService{
     public TripResponseDTO shareTrip(Long tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
-        return optionalTrip.map(TripConverter::toDto).orElse(null);
+        return TripConverter.toDto(optionalTrip.get());
     }
 
     /*
     여행 목록 전체 조회
      */
     @Override
-    public List<TripResponseDTO> searchTrip(String keyWord) {
-        //Todo: keyWord를 각각 여행 이름 검색, 멤버 이름(여행들 중에서 여행 참여자의 이름과 같은 여행들을 갖고온다.) 검색,
-        // 연도 검색 모두 이용하고 각각의 검색 결과를 모두 반환.
-        List<Trip> tripList = tripRepository.findByName(keyWord);
-        List<TripMember> tripMemberList = tripMemberRepository.findAll();
+    @Transactional
+    public List<TripDetailResponseDTO> searchTrip(String keyWord) {
 
-        return null;
+        //여행 이름이 keyword와 같은 것들 갖고 오기.
+        List<Trip> byTripName = Optional.ofNullable(tripRepository.findByNameLike("%"+ keyWord +"%"))
+                .orElse(Collections.emptyList());
+        Set<Trip> tripSet = new HashSet<>(byTripName);
+
+        //멤버 이름 검색
+        List<Trip> byMemberName = new ArrayList<>();
+        List<TripMember> tripMemberList = tripMemberRepository.findAll();
+        for (TripMember tripMember : tripMemberList){
+            Member member = tripMember.getMember();
+            if (Objects.equals(member.getName(), keyWord)){
+                byMemberName.add(tripMember.getTrip());
+            }
+        }
+        tripSet.addAll(byMemberName);
+
+        //연도 검색
+        Integer year = Integer.parseInt(keyWord);
+        List<Trip> byYear = Optional.ofNullable(tripRepository.findByYear(year))
+                .orElse(Collections.emptyList());
+        tripSet.addAll(byYear);
+
+        List<Trip> trips = new ArrayList<>(tripSet);
+        if (trips.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
+
+        return TripConverter.toDetailListDto(trips);
     }
 
     /*
@@ -99,6 +119,6 @@ public class TripServiceImpl implements TripService{
     public TripDetailResponseDTO detailTrip(Long tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
-        return optionalTrip.map(TripConverter::toDetailDto).orElse(null);
+        return TripConverter.toDetailDto(optionalTrip.get());
     }
 }

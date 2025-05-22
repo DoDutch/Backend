@@ -59,9 +59,8 @@ public class TripController {
     여행 목록 전체 조회(시간순)
      */
     @GetMapping("/search")
-    public ApiResponse<List<TripResponseDTO>> searchTrip(
-            @RequestParam(value = "keyWord")String keyWord){
-        List<TripResponseDTO> responseDTOList = tripService.searchTrip(keyWord);
+    public ApiResponse<List<TripDetailResponseDTO>> searchTrip(@RequestParam(value = "keyWord")String keyWord){
+        List<TripDetailResponseDTO> responseDTOList = tripService.searchTrip(keyWord);
         return ApiResponse.onSuccess(responseDTOList);
     }
 

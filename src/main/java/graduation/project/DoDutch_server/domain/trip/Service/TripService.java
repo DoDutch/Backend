@@ -13,6 +13,6 @@ public interface TripService {
     public Long createTrip(TripRequestDTO tripRequestDTO);
     public Void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId);
     public TripResponseDTO shareTrip(Long tripId);
-    public List<TripResponseDTO> searchTrip(String keyWord);
+    public List<TripDetailResponseDTO> searchTrip(String keyWord);
     public TripDetailResponseDTO detailTrip(Long tripId);
 }
