@@ -5,18 +5,11 @@ import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.Service.TripServiceImpl;
-import graduation.project.DoDutch_server.domain.trip.entity.Trip;
-import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
-import graduation.project.DoDutch_server.global.common.ResponseDTO;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/trip")
@@ -27,19 +20,21 @@ public class TripController {
     /*
     여행생성
      */
-//    @PostMapping
-//    public ResponseEntity<ResponseDTO<Long>> tripRegister(@RequestBody TripRequestDTO tripRequestDTO) {
-//        ResponseDTO<Long> responseDTO;
-//
-//
-//    }
+    @PostMapping
+    public ApiResponse<Long> tripRegister(@RequestBody TripRequestDTO tripRequestDTO) { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
+        //Todo: 여행 생성자의 member id 넘겨주기.
+        Long memberId = 1L;
+
+        Long tripId = tripService.createTrip(tripRequestDTO, memberId);
+        return ApiResponse.onSuccess(tripId);
+    }
 
     /*
     여행 참여
      */
     @PostMapping("/join")
     public ApiResponse<Void> tripJoin(@RequestBody TripJoinRequestDTO tripJoinRequestDTO) {
-        //Todo: 시큐리티로 참여자 id 넘겨주기.
+        //Todo: 여행 참여자의 id 넘겨주기.
         Long memberId = 1L;
 
         tripService.joinTrip(tripJoinRequestDTO, memberId);

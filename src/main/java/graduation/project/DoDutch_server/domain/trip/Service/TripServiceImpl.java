@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -33,8 +31,27 @@ public class TripServiceImpl implements TripService{
      */
     @Transactional
     @Override
-    public Long createTrip(TripRequestDTO tripRequestDTO) {
-        Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO));
+    public Long createTrip(TripRequestDTO tripRequestDTO, Long memberId) {
+        //Todo: UUID를 통해 랜덤 값을 생성해 Uuid 객체에 저장
+        //Todo: 랜덤 값을 s3 업로드 함수의 키값으로 이용해 실제 tripImageUrl을 생성
+        //Todo: 만들어진 진짜 tripImageUrl을 toEntity의 매개변수로 넣어준다.
+
+        //UUID를 통한 랜덤한 참여 코드 생성
+        String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+
+        //여행 저장
+        Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode));
+
+        //여행 참여자 저장
+        Optional<Member> optionalMember = memberRepository.findById(memberId);
+        if (optionalMember.isEmpty()) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
+
+        TripMember tripMember = TripMember.builder()
+                .member(optionalMember.get())
+                .trip(savedTrip)
+                .build();
+        tripMemberRepository.save(tripMember);
+
         return savedTrip.getId();
     }
 
@@ -43,7 +60,7 @@ public class TripServiceImpl implements TripService{
      */
     @Transactional
     @Override
-    public Void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId) {
+    public void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId) {
         //trip과 member 불러오기
         Optional<Trip> optionalTrip = tripRepository.findByJoinCode(tripJoinRequestDTO.getJoinCode());
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
@@ -61,8 +78,9 @@ public class TripServiceImpl implements TripService{
         }
 
         //tripMember 저장
-        tripMemberRepository.save(TripMember.builder().trip(trip).member(member).build());
-        return null;
+        TripMember tripMember = TripMember.builder().trip(trip).member(member).build();
+        tripMemberRepository.save(tripMember);
+        return;
     }
 
     /*

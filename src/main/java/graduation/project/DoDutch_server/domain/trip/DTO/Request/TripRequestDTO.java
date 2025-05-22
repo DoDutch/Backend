@@ -19,4 +19,5 @@ public class TripRequestDTO {
     private String place; // 여행지
     private Integer budget; // 예산
 //    private MultipartFile tripImage;
+    private String tripImageUrl; // aws와 실제 연결하여 이미지 업로드 하기 전까지 사용하는 임시 변수
 }
