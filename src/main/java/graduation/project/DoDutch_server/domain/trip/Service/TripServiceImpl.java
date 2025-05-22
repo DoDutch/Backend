@@ -101,8 +101,9 @@ public class TripServiceImpl implements TripService{
     @Transactional
     public List<TripDetailResponseDTO> searchTrip(String keyWord) {
 
+        String clearKeyword = keyWord.trim();
         //여행 이름이 keyword와 같은 것들 갖고 오기.
-        List<Trip> byTripName = Optional.ofNullable(tripRepository.findByNameLike("%"+ keyWord +"%"))
+        List<Trip> byTripName = Optional.ofNullable(tripRepository.findByNameLike("%"+ clearKeyword +"%"))
                 .orElse(Collections.emptyList());
         Set<Trip> tripSet = new HashSet<>(byTripName);
 
@@ -111,22 +112,25 @@ public class TripServiceImpl implements TripService{
         List<TripMember> tripMemberList = tripMemberRepository.findAll();
         for (TripMember tripMember : tripMemberList){
             Member member = tripMember.getMember();
-            if (Objects.equals(member.getName(), keyWord)){
+            if (Objects.equals(member.getName(), clearKeyword)){
                 byMemberName.add(tripMember.getTrip());
             }
         }
         tripSet.addAll(byMemberName);
 
         //연도 검색
-        Integer year = Integer.parseInt(keyWord);
-        List<Trip> byYear = Optional.ofNullable(tripRepository.findByYear(year))
-                .orElse(Collections.emptyList());
-        tripSet.addAll(byYear);
+        boolean isNumeric = clearKeyword.matches("\\d+");
+        if (isNumeric) { // 만약 keyword가 숫자이면 연도 검색 시작
+            Integer year = Integer.parseInt(clearKeyword);
+            List<Trip> byYear = Optional.ofNullable(tripRepository.findByYear(year))
+                    .orElse(Collections.emptyList());
+            tripSet.addAll(byYear);
+        }
+            List<Trip> trips = new ArrayList<>(tripSet);
+            if (trips.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
 
-        List<Trip> trips = new ArrayList<>(tripSet);
-        if (trips.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
+            return TripConverter.toDetailListDto(trips);
 
-        return TripConverter.toDetailListDto(trips);
     }
 
     /*
