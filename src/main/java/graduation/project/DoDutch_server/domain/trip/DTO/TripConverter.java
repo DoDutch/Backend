@@ -15,14 +15,14 @@ import java.util.stream.Collectors;
 public class TripConverter {
     public static Trip toEntity(TripRequestDTO tripRequestDTO, String joinCode /* ,String tripImageUrl*/) {
         return Trip.builder()
-                .name(tripRequestDTO.getName())
+                .name(tripRequestDTO.getTripName())
                 .place(tripRequestDTO.getPlace())
                 .startDate(tripRequestDTO.getStartDate())
                 .endDate(tripRequestDTO.getEndDate())
                 .budget(tripRequestDTO.getBudget())
                 .joinCode(joinCode)
                 .totalCost(0)
-                .tripImageUrl(tripRequestDTO.getTripImageUrl()) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
+                .tripImageUrl(tripRequestDTO.getTripImage()) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
                 .build();
     }
 
