@@ -1,8 +1,7 @@
 package graduation.project.DoDutch_server.domain.expense.service;
 
 import graduation.project.DoDutch_server.domain.expense.converter.ExpenseConverter;
-import graduation.project.DoDutch_server.domain.expense.dto.ExpenseListReponseDto;
-import graduation.project.DoDutch_server.domain.expense.dto.ExpenseSingleResponseDto;
+import graduation.project.DoDutch_server.domain.expense.dto.*;
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
@@ -33,7 +32,7 @@ public class ExpenseService {
 //
 //    }
 
-    public ExpenseSingleResponseDto getExpensesByTripId(Long tripId){ //전체 여행 지출 조회
+    public AllExpenseResponseDto getExpensesByTripId(Long tripId){ //전체 여행 지출 조회
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId)); //단일 객체 반환시 필요
 
@@ -49,27 +48,27 @@ public class ExpenseService {
                 .map(TripMember::getMember)
                 .collect(Collectors.toList());
 
-        return ExpenseConverter.toDtoSingleWrapperAllExpense(budget,remainingCost,expenses, members);
+        return ExpenseConverter.toAllExpenseResponseDto(budget,remainingCost,expenses, members);
 
     }
 
-    public ExpenseListReponseDto getExpensesByTripIdAndDate(Long tripId){ //날짜별 여행 지출 조회
+    public List<AllExpenseByDateResponseDto> getExpensesByTripIdAndDate(Long tripId){ //날짜별 여행 지출 조회
         List<Expense> expenses= expenseRepository.findByTripId(tripId);
 
-        return ExpenseConverter.toDtoListWrapperAllExpenseByDate(expenses);
+        return ExpenseConverter.toAllExpenseByDateResponseDto(expenses);
     }
 
-    public ExpenseSingleResponseDto getExpenseByExpenseId(Long tripId, Long expenseId){
+    public ExpenseByExpenseIdResponseDto getExpenseByExpenseId(Long expenseId){
 
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지출이 존재하지 않습니다: " +  expenseId));
 
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId));
+//        Trip trip = tripRepository.findById(tripId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId));
 
-        String tripName = trip.getName();
+        String tripName = expense.getTrip().getName();
 
-        return ExpenseConverter.toDtoSingleWrapperExpenseByExpenseId(expense, tripName);
+        return ExpenseConverter.toExpenseByExpenseIdResponseDto(expense, tripName);
 
     }
 

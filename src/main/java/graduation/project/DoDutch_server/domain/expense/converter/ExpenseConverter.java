@@ -42,12 +42,12 @@ public class ExpenseConverter {
                 .build();
     }
 
-    public static ExpenseSingleResponseDto toDtoSingleWrapperAllExpense(int budget, //data 붙은 여행별 전체 지출 조회 response dto
-                                                         int remainingCost,
-                                                         List<Expense> expenses,
-                                                         List<Member> members){
-        return new ExpenseSingleResponseDto(toAllExpenseResponseDto(budget,remainingCost,expenses,members));
-    }
+//    public static ExpenseSingleResponseDto toDtoSingleWrapperAllExpense(int budget, //data 붙은 여행별 전체 지출 조회 response dto
+//                                                         int remainingCost,
+//                                                         List<Expense> expenses,
+//                                                         List<Member> members){
+//        return new ExpenseSingleResponseDto(toAllExpenseResponseDto(budget,remainingCost,expenses,members));
+//    }
 
     public static List<AllExpenseByDateResponseDto> toAllExpenseByDateResponseDto(List<Expense> expenses){// 날짜별 전체 지출 조회 response dto
         return expenses.stream()
@@ -61,9 +61,9 @@ public class ExpenseConverter {
 
     }
 
-    public static ExpenseListReponseDto toDtoListWrapperAllExpenseByDate(List<Expense> expenses){ //data 붙은 날짜별 전체 지출 조회 response dto
-        return new ExpenseListReponseDto(toAllExpenseByDateResponseDto(expenses));
-    }
+//    public static ExpenseListReponseDto toDtoListWrapperAllExpenseByDate(List<Expense> expenses){ //data 붙은 날짜별 전체 지출 조회 response dto
+//        return new ExpenseListReponseDto(toAllExpenseByDateResponseDto(expenses));
+//    }
 
     public static ExpenseByExpenseIdResponseDto toExpenseByExpenseIdResponseDto(Expense expense, String tripName){ //지출별 조회
         return ExpenseByExpenseIdResponseDto.builder()
@@ -76,9 +76,9 @@ public class ExpenseConverter {
                 .build();
     }
 
-    public static ExpenseSingleResponseDto toDtoSingleWrapperExpenseByExpenseId(Expense expense, String tripName){ //data 붙은 지출별 조회
-        return new ExpenseSingleResponseDto(toExpenseByExpenseIdResponseDto(expense,tripName));
-    }
+//    public static ExpenseSingleResponseDto toDtoSingleWrapperExpenseByExpenseId(Expense expense, String tripName){ //data 붙은 지출별 조회
+//        return new ExpenseSingleResponseDto(toExpenseByExpenseIdResponseDto(expense,tripName));
+//    }
 
 
 }
