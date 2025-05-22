@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.DTO.Response;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import graduation.project.DoDutch_server.domain.photo.entity.Photo;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TripDetailResponseDTO {
     private Long tripId;
     private String tripName;
