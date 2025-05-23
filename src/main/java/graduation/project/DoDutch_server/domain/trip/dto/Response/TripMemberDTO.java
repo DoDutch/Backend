@@ -1,4 +1,4 @@
-package graduation.project.DoDutch_server.domain.trip.DTO.Response;
+package graduation.project.DoDutch_server.domain.trip.dto.Response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

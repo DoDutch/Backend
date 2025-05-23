@@ -1,10 +1,9 @@
-package graduation.project.DoDutch_server.domain.trip.DTO.Request;
+package graduation.project.DoDutch_server.domain.trip.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 

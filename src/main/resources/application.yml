@@ -2,9 +2,10 @@
 spring:
   datasource:
     # ?? ?? DB ?? ????
-    url: jdbc:mysql://localhost:3306/dodutch?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/dodutch
     username: root
-    password: ljw3530
+    password: Rlahdduq2@
+
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect

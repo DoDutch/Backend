@@ -1,14 +1,14 @@
-package graduation.project.DoDutch_server.domain.trip.Service;
+package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
-import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripJoinRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripDetailResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.TripConverter;
-import graduation.project.DoDutch_server.domain.trip.Repository.TripMemberRepository;
-import graduation.project.DoDutch_server.domain.trip.Repository.TripRepository;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.TripConverter;
+import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
+import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
