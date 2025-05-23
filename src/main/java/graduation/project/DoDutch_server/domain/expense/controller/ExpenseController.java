@@ -38,8 +38,7 @@ public class ExpenseController {
     }
 
     /*
-    이거 좀 이상함. 원래 목적은 expenseId로 조회하고 거기에 tripId로 이름 가져오기
-    지금은 각각 다르게 조회되는 문제 있음...
+    지출별 조회
      */
     @GetMapping("/expense/{expenseId}")
     public ApiResponse<ExpenseByExpenseIdResponseDto> getExpensesById(@PathVariable("expenseId") Long expenseId){

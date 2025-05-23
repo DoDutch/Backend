@@ -9,6 +9,8 @@ import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
+import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.misc.Triple;
@@ -34,7 +36,7 @@ public class ExpenseService {
 
     public AllExpenseResponseDto getExpensesByTripId(Long tripId){ //전체 여행 지출 조회
         Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId)); //단일 객체 반환시 필요
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
 
         List<Expense> expenses= expenseRepository.findByTripId(tripId); //지출 기록
 
@@ -53,6 +55,9 @@ public class ExpenseService {
     }
 
     public List<AllExpenseByDateResponseDto> getExpensesByTripIdAndDate(Long tripId){ //날짜별 여행 지출 조회
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
+
         List<Expense> expenses= expenseRepository.findByTripId(tripId);
 
         return ExpenseConverter.toAllExpenseByDateResponseDto(expenses);
@@ -61,7 +66,7 @@ public class ExpenseService {
     public ExpenseByExpenseIdResponseDto getExpenseByExpenseId(Long expenseId){
 
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 지출이 존재하지 않습니다: " +  expenseId));
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.EXPENSE_NOT_EXIST));
 
 //        Trip trip = tripRepository.findById(tripId)
 //                .orElseThrow(() -> new IllegalArgumentException("해당 여행이 존재하지 않습니다: " + tripId));
