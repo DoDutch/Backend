@@ -1,4 +1,4 @@
-package graduation.project.DoDutch_server.domain.trip.DTO.Request;
+package graduation.project.DoDutch_server.domain.trip.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

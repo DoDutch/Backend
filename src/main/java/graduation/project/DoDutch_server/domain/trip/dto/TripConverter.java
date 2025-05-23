@@ -1,11 +1,11 @@
-package graduation.project.DoDutch_server.domain.trip.DTO;
+package graduation.project.DoDutch_server.domain.trip.dto;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
-import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripDetailResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripExpenseDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripMemberDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripExpenseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripMemberDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 

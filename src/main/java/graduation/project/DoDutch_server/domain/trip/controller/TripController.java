@@ -1,10 +1,10 @@
-package graduation.project.DoDutch_server.domain.trip.Controller;
+package graduation.project.DoDutch_server.domain.trip.controller;
 
-import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripJoinRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Request.TripRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripDetailResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.DTO.Response.TripResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.Service.TripServiceImpl;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
+import graduation.project.DoDutch_server.domain.trip.service.TripServiceImpl;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
