@@ -5,6 +5,7 @@
 build/
 .gradle/
 .idea/
+uploads/
 
 # User-specific stuff
 .idea/**/workspace.xml
