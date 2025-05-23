@@ -66,10 +66,10 @@ public class TripController {
     }
 
     /*
-     * 여행 목록 전체 조회(시간순)
+     * 여행 검색
      */
     @GetMapping("/search")
-    @Operation(summary = "여행 목록 전체 조회(시간순) API")
+    @Operation(summary = "여행 검색 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
