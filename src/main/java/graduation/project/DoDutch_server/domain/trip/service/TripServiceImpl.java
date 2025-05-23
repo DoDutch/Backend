@@ -16,7 +16,13 @@ import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHa
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -31,7 +37,7 @@ public class TripServiceImpl implements TripService{
      */
     @Transactional
     @Override
-    public Long createTrip(TripRequestDTO tripRequestDTO, Long memberId) {
+    public Long createTrip(TripRequestDTO tripRequestDTO, Long memberId) throws IOException {
         //Todo: UUID를 통해 랜덤 값을 생성해 Uuid 객체에 저장
         //Todo: 랜덤 값을 s3 업로드 함수의 키값으로 이용해 실제 tripImageUrl을 생성
         //Todo: 만들어진 진짜 tripImageUrl을 toEntity의 매개변수로 넣어준다.
@@ -39,8 +45,11 @@ public class TripServiceImpl implements TripService{
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
+        //이미지를 로컬에 저장후 경로 반환
+        String savedPath = saveImageToLocal(tripRequestDTO.getTripImage());
+
         //여행을 저장한다.
-        Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode));
+        Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode, savedPath));
 
         //여행 생성한 회원을 여행 참여자로 저장한다.
         Optional<Member> optionalMember = memberRepository.findById(memberId);
@@ -53,6 +62,22 @@ public class TripServiceImpl implements TripService{
         tripMemberRepository.save(tripMember);
 
         return savedTrip.getId();
+    }
+
+    /*
+    이미지 저장 및 경로 반환
+     */
+    private String saveImageToLocal(MultipartFile file) throws IOException {
+        //저장할 이미지 경로 생성
+        String uploadDir = "C:/Users/lee07/Project/DoDutch/images/";
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir + fileName);
+
+        //디렉토리가 없으면 생성
+        Files.createDirectories(filePath.getParent());
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return "C:/Users/lee07/Project/DoDutch/images/" + fileName;
     }
 
     /*
