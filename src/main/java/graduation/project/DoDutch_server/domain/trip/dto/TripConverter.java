@@ -86,7 +86,7 @@ public class TripConverter {
                 .place(trip.getPlace())
                 .totalCost(trip.getTotalCost())
                 .budget(trip.getBudget())
-                .tripImageUrl(trip.getTripImageUrl())
+//                .tripImageUrl(trip.getTripImageUrl())
                 .members(toMemberList1(trip.getTripMembers()))
                 .photos(toExpenseDtoList(trip.getExpenses()))
                 .build();
