@@ -16,7 +16,7 @@ public class TripConverter {
     /*
     Dto를 Entity로 변환
      */
-    public static Trip toEntity(TripRequestDTO tripRequestDTO, String joinCode /* ,String tripImageUrl*/) {
+    public static Trip toEntity(TripRequestDTO tripRequestDTO, String joinCode ,String tripImageUrl) {
         return Trip.builder()
                 .name(tripRequestDTO.getTripName())
                 .place(tripRequestDTO.getPlace())
@@ -25,7 +25,7 @@ public class TripConverter {
                 .budget(tripRequestDTO.getBudget())
                 .joinCode(joinCode)
                 .totalCost(0)
-                .tripImageUrl(tripRequestDTO.getTripImage()) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
+                .tripImageUrl(tripImageUrl) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
                 .build();
     }
 

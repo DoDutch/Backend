@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,7 @@ public class TripController {
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<Long> tripRegister(@RequestBody TripRequestDTO tripRequestDTO) { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
+    public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) throws IOException { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
         //Todo: 여행 생성자의 member id 넘겨주기.
         Long memberId = 1L;
 
