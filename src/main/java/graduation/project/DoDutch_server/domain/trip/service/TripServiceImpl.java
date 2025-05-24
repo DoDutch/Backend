@@ -6,7 +6,7 @@ import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequest
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.dto.TripConverter;
+import graduation.project.DoDutch_server.domain.trip.converter.TripConverter;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
