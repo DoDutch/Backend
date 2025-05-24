@@ -47,7 +47,7 @@ public class TripController {
     })
     public ApiResponse<Void> tripJoin(@RequestBody TripJoinRequestDTO tripJoinRequestDTO) {
         //Todo: 여행 참여자의 id 넘겨주기.
-        Long memberId = 1L;
+        Long memberId = 2L;
 
         tripService.joinTrip(tripJoinRequestDTO, memberId);
         return ApiResponse.onSuccess();

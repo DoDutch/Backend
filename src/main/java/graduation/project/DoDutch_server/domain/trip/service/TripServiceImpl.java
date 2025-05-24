@@ -69,7 +69,7 @@ public class TripServiceImpl implements TripService{
      */
     private String saveImageToLocal(MultipartFile file) throws IOException {
         //저장할 이미지 경로 생성
-        String uploadDir = "C:/Users/lee07/Project/DoDutch/images/";
+        String uploadDir = "C:/Users/Lee Jewon/Pictures/image/";
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(uploadDir + fileName);
 
@@ -77,7 +77,7 @@ public class TripServiceImpl implements TripService{
         Files.createDirectories(filePath.getParent());
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return "C:/Users/lee07/Project/DoDutch/images/" + fileName;
+        return "C:/Users/Lee Jewon/Pictures/image/" + fileName;
     }
 
     /*

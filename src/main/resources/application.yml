@@ -2,9 +2,9 @@
 spring:
   datasource:
     # ?? ?? DB ?? ????
-    url: jdbc:mysql://localhost:3306/dodutch
+    url: jdbc:mysql://localhost:3306/dodutch?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
-    password: Rlahdduq2@
+    password: ljw3530
 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
