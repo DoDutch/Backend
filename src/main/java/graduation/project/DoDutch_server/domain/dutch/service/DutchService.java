@@ -1,5 +1,6 @@
 package graduation.project.DoDutch_server.domain.dutch.service;
 
+import graduation.project.DoDutch_server.domain.dutch.converter.DutchConverter;
 import graduation.project.DoDutch_server.domain.dutch.dto.DutchResponseDTO;
 import graduation.project.DoDutch_server.domain.dutch.dto.DutchUpdateRequestDTO;
 import graduation.project.DoDutch_server.domain.dutch.entity.Dutch;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static graduation.project.DoDutch_server.domain.dutch.converter.DutchConverter.toDutchResponseDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -165,7 +168,7 @@ public class DutchService {
     public List<DutchResponseDTO> findAllDutchs(Long tripId) {
         return dutchRepository.findByTripId(tripId)
                 .stream()
-                .map(this::toDTO)
+                .map(DutchConverter::toDutchResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -175,7 +178,7 @@ public class DutchService {
     public DutchResponseDTO findDutchById(Long tripId, Long dutchId) {
         Dutch dutch = dutchRepository.findById(dutchId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 dutch입니다."));
-        return toDTO(dutch);
+        return toDutchResponseDTO(dutch);
     }
 
 
@@ -188,19 +191,6 @@ public class DutchService {
                         .orElseThrow(() -> new RuntimeException("존재하지 않는 dutch입니다."));
         dutch.setIsCompleted(dutchUpdateRequestDTO.getIsCompleted());
         dutchRepository.save(dutch);
-        return toDTO(dutch);
-    }
-
-
-    /*
-     * DTO 변환
-     */
-    private DutchResponseDTO toDTO(Dutch dutch) {
-        return DutchResponseDTO.builder()
-                .payer(dutch.getPayer().getId())
-                .payee(dutch.getPayee().getId())
-                .perCost(dutch.getPerCost())
-                .isCompleted(dutch.getIsCompleted())
-                .build();
+        return toDutchResponseDTO(dutch);
     }
 }
