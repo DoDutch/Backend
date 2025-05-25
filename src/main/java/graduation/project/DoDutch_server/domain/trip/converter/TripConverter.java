@@ -1,4 +1,4 @@
-package graduation.project.DoDutch_server.domain.trip.dto;
+package graduation.project.DoDutch_server.domain.trip.converter;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
