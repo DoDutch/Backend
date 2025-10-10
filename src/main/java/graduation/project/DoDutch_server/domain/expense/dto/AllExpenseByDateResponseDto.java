@@ -1,6 +1,5 @@
 package graduation.project.DoDutch_server.domain.expense.dto;
 
-import graduation.project.DoDutch_server.domain.expense.entity.ExpenseCategory;
 import lombok.Builder;
 import lombok.Getter;
 
