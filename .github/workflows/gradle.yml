@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" , "feat/cicd-17"]
+    branches: [ "main", "feat/cicd-17" ]
   pull_request:
-    branches: [ "main" , "feat/cicd-17"]
+    branches: [ "main", "feat/cicd-17" ]
 
 jobs:
   build-docker-image:
@@ -31,17 +31,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3️⃣ Gradle 설정 및 캐싱
+      # 3️⃣ Gradle 캐시
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 4️⃣ gradlew 실행 권한 부여
-      - name: Set executable permission for Gradlew
-        run: chmod +x ./gradlew
+      # 4️⃣ gradlew 실행 권한 부여 (Backend 내부)
+      - name: Grant execute permission for Gradlew
+        working-directory: ./Backend
+        run: chmod +x gradlew
 
       # 5️⃣ Spring Boot 빌드 (테스트 제외)
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test
+        working-directory: ./Backend
+        run: ./gradlew clean build -x test
 
       # 6️⃣ DockerHub 로그인
       - name: DockerHub Login
@@ -52,7 +54,7 @@ jobs:
 
       # 7️⃣ Docker 이미지 빌드
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test ./Backend
 
       # 8️⃣ DockerHub로 푸시
       - name: Push Docker Image
