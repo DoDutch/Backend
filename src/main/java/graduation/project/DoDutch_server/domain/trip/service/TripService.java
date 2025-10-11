@@ -14,4 +14,5 @@ public interface TripService {
     TripResponseDTO shareTrip(Long tripId);
     List<TripDetailResponseDTO> searchTrip(String keyWord);
     TripDetailResponseDTO detailTrip(Long tripId);
+    List<Float> predictBudget(Long tripId);
 }
