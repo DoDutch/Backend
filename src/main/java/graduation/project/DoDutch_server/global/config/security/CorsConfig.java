@@ -1,4 +1,4 @@
-package graduation.project.DoDutch_server.global.config.web;
+package graduation.project.DoDutch_server.global.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +11,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:3000"
-                ) // 허용할 여러 Origin 설정
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") // 허용할 HTTP 메서드
-                .allowedHeaders("*"); // 모든 헤더 허용
+                .allowedOrigins("*")
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(false)
+                .maxAge(3600); // 사전 요청 캐시 시간 설정: 1시간
     }
 }
