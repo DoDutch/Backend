@@ -22,6 +22,17 @@ public class Member extends BaseEntity {
     private String name;
     private String nickname;
 
+    private String kakaoId;
+    private String refreshToken;
+
     @OneToMany(mappedBy = "member")
     private List<TripMember> tripMembers = new ArrayList<>();
+
+    public void setRefreshToken(String token) {
+        this.refreshToken = token;
+    }
+
+    public void setNickname(String nickname){
+        this.nickname = nickname;
+    }
 }

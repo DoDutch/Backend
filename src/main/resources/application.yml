@@ -20,3 +20,12 @@ spring:
       max-request-size: 50MB
       max-file-size: 50MB
       enabled: true
+
+# Kakao OAuth2 Configuration
+kakao:
+  client-id: 10465b286770cf6059972c6fe9f6cff1
+  redirect-url: http://localhost:8080/api/users/login/oauth/kakao
+
+# JWT Configuration
+jwt:
+  secret-key: 9kL2mN5pQ8rS1tU4vW7xY0zA3bC6dE9fG2hJ5kM8nP1qR4sT7uV0wX3yZ6aB9cD
