@@ -1,5 +1,6 @@
 package graduation.project.DoDutch_server.domain.trip.controller;
 
+import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.PredictResponseDto;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
@@ -105,11 +106,11 @@ public class TripController {
     /*
      * 여행 경비 예측
      */
-    @GetMapping("/{tripId}/predict")
-    public ApiResponse<PredictResponseDto> predictTrip(@PathVariable("tripId") Long tripId){
+    @PostMapping("/predict")
+    public ApiResponse<PredictResponseDto> predictTrip(@RequestBody PredictRequestDto requestDto){
         try {
             // feature 생성
-            List<Float> features = tripService.predictBudget(tripId);
+            List<Float> features = tripService.predictBudget(requestDto);
 
             // Flask 서버로 전달
             String url = "http://localhost:5000/predict";
@@ -123,7 +124,7 @@ public class TripController {
             Double predicted = (Double) response.getBody().get("predicted_total_cost");
 
 
-            PredictResponseDto responseDto = new PredictResponseDto(tripId, predicted.intValue()+" 원");
+            PredictResponseDto responseDto = new PredictResponseDto(predicted.intValue()+" 원");
 
             return ApiResponse.onSuccess(responseDto);
 
