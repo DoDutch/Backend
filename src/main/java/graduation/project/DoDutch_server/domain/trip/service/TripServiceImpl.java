@@ -191,4 +191,17 @@ public class TripServiceImpl implements TripService{
         trip.updateInfo(requestDTO);
 
     }
+
+    /*
+    여행 삭제
+     */
+    @Override
+    @Transactional
+    public void deleteTrip(Long tripId) {
+        Member currentMember = authUtils.getCurrentMember();
+        tripMemberRepository
+                .findByTripIdAndMemberId(tripId, currentMember.getId())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        tripMemberRepository.deleteById(tripId);
+    }
 }

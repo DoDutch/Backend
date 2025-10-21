@@ -16,4 +16,5 @@ public interface TripService {
     List<TripDetailResponseDTO> searchTrip(String keyWord);
     TripDetailResponseDTO detailTrip(Long tripId);
     void updateTrip(Long tripId, TripUpdateRequestDTO requestDTO);
+    void deleteTrip(Long tripId);
 }

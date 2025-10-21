@@ -106,4 +106,19 @@ public class TripController {
         tripService.updateTrip(tripId, requestDTO);
         return ApiResponse.onSuccess();
     }
+
+    /*
+     * 여행 삭제
+     */
+    @DeleteMapping("/{tripId}")
+    @Operation(summary = "여행 삭제 API")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<TripUpdateRequestDTO> tripDelete(
+            @PathVariable("tripId") Long tripId
+    ){
+        tripService.deleteTrip(tripId);
+        return ApiResponse.onSuccess();
+    }
 }
