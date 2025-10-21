@@ -1,5 +1,6 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
+import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
@@ -14,4 +15,5 @@ public interface TripService {
     TripResponseDTO shareTrip(Long tripId);
     List<TripDetailResponseDTO> searchTrip(String keyWord);
     TripDetailResponseDTO detailTrip(Long tripId);
+    List<Float> predictBudget(PredictRequestDto requestDto);
 }
