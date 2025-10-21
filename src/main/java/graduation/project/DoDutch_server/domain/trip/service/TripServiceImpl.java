@@ -2,8 +2,10 @@ package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.domain.trip.converter.TripMemberConverter;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.converter.TripConverter;
@@ -13,6 +15,7 @@ import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +34,19 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
+    private final AuthUtils authUtils;
 
     /*
     여행 생성
      */
     @Transactional
     @Override
-    public Long createTrip(TripRequestDTO tripRequestDTO, Long memberId) throws IOException {
+    public Long createTrip(TripRequestDTO tripRequestDTO) throws IOException {
         //Todo: UUID를 통해 랜덤 값을 생성해 Uuid 객체에 저장
         //Todo: 랜덤 값을 s3 업로드 함수의 키값으로 이용해 실제 tripImageUrl을 생성
         //Todo: 만들어진 진짜 tripImageUrl을 toEntity의 매개변수로 넣어준다.
+
+        Member currentMember = authUtils.getCurrentMember();
 
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
@@ -52,14 +58,7 @@ public class TripServiceImpl implements TripService{
         Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode, savedPath));
 
         //여행 생성한 회원을 여행 참여자로 저장한다.
-        Optional<Member> optionalMember = memberRepository.findById(memberId);
-        if (optionalMember.isEmpty()) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
-
-        TripMember tripMember = TripMember.builder()
-                .member(optionalMember.get())
-                .trip(savedTrip)
-                .build();
-        tripMemberRepository.save(tripMember);
+        tripMemberRepository.save(TripMemberConverter.toEntity(currentMember, savedTrip));
 
         return savedTrip.getId();
     }
@@ -69,7 +68,8 @@ public class TripServiceImpl implements TripService{
      */
     private String saveImageToLocal(MultipartFile file) throws IOException {
         //저장할 이미지 경로 생성
-        String uploadDir = "C:/Users/kimhy/Desktop/Backend/uploads/";
+//        String uploadDir = "C:/Users/kimhy/Desktop/Backend/uploads/";
+        String uploadDir = "C:/Users/lee07/Desktop/upload";
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(uploadDir + fileName);
 
@@ -77,7 +77,7 @@ public class TripServiceImpl implements TripService{
         Files.createDirectories(filePath.getParent());
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return "C:/Users/kimhy/Desktop/Backend/uploads/" + fileName;
+        return filePath + fileName;
     }
 
 
@@ -170,5 +170,25 @@ public class TripServiceImpl implements TripService{
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
         return TripConverter.toDetailDto(optionalTrip.get());
+    }
+
+    /*
+    여행 수정
+     */
+    @Override
+    @Transactional
+    public void updateTrip(
+            Long tripId, TripUpdateRequestDTO requestDTO
+    ){
+        Member currentMember = authUtils.getCurrentMember();
+        tripMemberRepository
+                .findByTripIdAndMemberId(tripId, currentMember.getId())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
+
+        trip.updateInfo(requestDTO);
+
     }
 }
