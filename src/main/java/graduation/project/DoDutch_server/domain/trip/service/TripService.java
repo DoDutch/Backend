@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface TripService {
     Long createTrip(TripRequestDTO tripRequestDTO) throws IOException;
-    void joinTrip(TripJoinRequestDTO tripJoinRequestDTO, Long memberId);
+    void joinTrip(TripJoinRequestDTO tripJoinRequestDTO);
     TripResponseDTO shareTrip(Long tripId);
     List<TripDetailResponseDTO> searchTrip(String keyWord);
     TripDetailResponseDTO detailTrip(Long tripId);

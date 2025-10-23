@@ -45,10 +45,8 @@ public class TripController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     public ApiResponse<Void> tripJoin(@RequestBody TripJoinRequestDTO tripJoinRequestDTO) {
-        //Todo: 여행 참여자의 id 넘겨주기.
-        Long memberId = 1L;
 
-        tripService.joinTrip(tripJoinRequestDTO, memberId);
+        tripService.joinTrip(tripJoinRequestDTO);
         return ApiResponse.onSuccess();
     }
 
