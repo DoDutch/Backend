@@ -2,20 +2,24 @@ package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
-import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.*;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.ChatGPTResponseDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.converter.TripConverter;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.global.config.openai.OpenAiConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,6 +35,12 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
+    private final OpenAiConfig openAiConfig;
+
+    @Value("${openai.model}")
+    private String model;
+    @Value("${openai.api.url}")
+    private String apiUrl;
 
     /*
     여행 생성
@@ -170,5 +180,22 @@ public class TripServiceImpl implements TripService{
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
         return TripConverter.toDetailDto(optionalTrip.get());
+    }
+
+    /*
+    gpt 여행지 추천
+     */
+    @Override
+    @Transactional
+    public TripSuggestionResponseDto recommendTrip(
+            TripSuggestionRequestDto requestDto
+    ){
+        RestTemplate restTemplate = openAiConfig.restTemplate();
+
+        String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
+        ChatGPTRequestDto chatGPTRequestDto = ChatGPTRequestDto.gptRequest(model, prompt);
+
+        ChatGPTResponseDto chatGPTResponseDto = restTemplate.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
+        return new TripSuggestionResponseDto(chatGPTResponseDto.choices().get(0).message().content());
     }
 }

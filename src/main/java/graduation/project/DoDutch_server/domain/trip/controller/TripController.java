@@ -1,5 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.controller;
 
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripSuggestionRequestDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
@@ -7,6 +9,7 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResp
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.service.TripServiceImpl;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -90,5 +93,20 @@ public class TripController {
     public ApiResponse<TripDetailResponseDTO> detailTripInfo(@PathVariable("tripId") Long tripId){
         TripDetailResponseDTO tripDetailResponseDTO = tripService.detailTrip(tripId);
         return ApiResponse.onSuccess(tripDetailResponseDTO);
+    }
+
+    /*
+     * gpt 여행지 추천
+     */
+    @PostMapping("/chat")
+    @Operation(summary = "여행지 추천 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<TripSuggestionResponseDto> tripRecommend(
+            @RequestBody TripSuggestionRequestDto requestDto
+            ){
+        TripSuggestionResponseDto responseDto = tripService.recommendTrip(requestDto);
+        return ApiResponse.onSuccess(responseDto);
     }
 }
