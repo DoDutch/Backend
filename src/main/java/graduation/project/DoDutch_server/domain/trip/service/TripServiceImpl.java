@@ -127,6 +127,9 @@ public class TripServiceImpl implements TripService{
                 .map(TripMember::getTrip)
                 .toList();
 
+        if (keyWord == null || keyWord.isEmpty())
+            return TripConverter.toDetailListDto(myTrip);
+
         String clearKeyword = keyWord.trim(); // 좌우 공백 삭제
         Set<Trip> tripSet = new HashSet<>(validateTripByTripName(clearKeyword, myTrip));
         tripSet.addAll(validateTripByYear(clearKeyword,myTrip));
