@@ -1,5 +1,6 @@
 package graduation.project.DoDutch_server.domain.trip.controller;
 
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
@@ -30,10 +31,8 @@ public class TripController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) throws IOException { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
-        //Todo: 여행 생성자의 member id 넘겨주기.
-        Long memberId = 1L;
 
-        Long tripId = tripService.createTrip(tripRequestDTO, memberId);
+        Long tripId = tripService.createTrip(tripRequestDTO);
         return ApiResponse.onSuccess(tripId);
     }
 
@@ -46,10 +45,8 @@ public class TripController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     public ApiResponse<Void> tripJoin(@RequestBody TripJoinRequestDTO tripJoinRequestDTO) {
-        //Todo: 여행 참여자의 id 넘겨주기.
-        Long memberId = 1L;
 
-        tripService.joinTrip(tripJoinRequestDTO, memberId);
+        tripService.joinTrip(tripJoinRequestDTO);
         return ApiResponse.onSuccess();
     }
 
@@ -90,5 +87,36 @@ public class TripController {
     public ApiResponse<TripDetailResponseDTO> detailTripInfo(@PathVariable("tripId") Long tripId){
         TripDetailResponseDTO tripDetailResponseDTO = tripService.detailTrip(tripId);
         return ApiResponse.onSuccess(tripDetailResponseDTO);
+    }
+
+    /*
+     * 여행 수정
+     */
+    @PatchMapping("/{tripId}")
+    @Operation(summary = "여행 수정 API")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<TripUpdateRequestDTO> tripUpdate(
+            @PathVariable("tripId") Long tripId,
+            @RequestBody TripUpdateRequestDTO requestDTO
+    ){
+        tripService.updateTrip(tripId, requestDTO);
+        return ApiResponse.onSuccess();
+    }
+
+    /*
+     * 여행 삭제
+     */
+    @DeleteMapping("/{tripId}")
+    @Operation(summary = "여행 삭제 API")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<TripUpdateRequestDTO> tripDelete(
+            @PathVariable("tripId") Long tripId
+    ){
+        tripService.deleteTrip(tripId);
+        return ApiResponse.onSuccess();
     }
 }
