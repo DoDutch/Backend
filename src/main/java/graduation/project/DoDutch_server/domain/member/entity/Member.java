@@ -25,6 +25,9 @@ public class Member extends BaseEntity {
     private String kakaoId;
     private String refreshToken;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @OneToMany(mappedBy = "member")
     private List<TripMember> tripMembers = new ArrayList<>();
 

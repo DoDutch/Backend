@@ -10,6 +10,7 @@ import graduation.project.DoDutch_server.domain.auth.dto.request.SignupRequestDT
 import graduation.project.DoDutch_server.domain.auth.dto.response.KakaoResponseDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.RefreshResponseDTO;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
 import graduation.project.DoDutch_server.global.config.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -112,6 +113,7 @@ public class AuthService {
         KakaoInfoDTO kakaoInfoDto = new KakaoInfoDTO(userAttributesByToken);
         Member member = Member.builder()
                 .kakaoId(kakaoInfoDto.getKakaoId())
+                .role(Role.MEMBER)
                 .build();
 
         boolean existMember = false;
@@ -199,6 +201,7 @@ public class AuthService {
         if (member == null) {
             member = Member.builder()
                     .kakaoId(kakaoId)
+                    .role(Role.MEMBER)
                     .build();
             memberRepository.save(member);
             isExistingMember = false;
