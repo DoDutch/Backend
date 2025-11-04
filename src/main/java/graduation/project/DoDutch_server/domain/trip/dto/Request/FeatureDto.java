@@ -1,5 +1,6 @@
 package graduation.project.DoDutch_server.domain.trip.dto.Request;
 
+import java.time.Period;
 import java.util.*;
 
 public class FeatureDto {
@@ -45,8 +46,30 @@ public class FeatureDto {
         }
     }
 
-    /** Flask로 보낼 때 feature 순서대로 value 리스트 변환 */
-    public List<Float> toValueList() {
+    public List<Float> setFeatures(PredictRequestDto requestDto){
+        Long numCompanion = requestDto.numCompanions();
+        this.setFeature("NUM_COMPANIONS", (float)numCompanion);
+
+        int month = requestDto.startDate().getMonthValue();
+        this.setFeature("MONTH", (float) month);
+
+        Period period = Period.between(requestDto.startDate(), requestDto.endDate());
+        int days = period.getDays();
+        if (days == 0) this.setFeature("DURATION_CATEGORY_당일", 1f);
+        else if (days == 1) {
+            this.setFeature("DURATION_CATEGORY_1박 2일", 1f);
+        }
+        else if (days == 2) {
+            this.setFeature("DURATION_CATEGORY_2박 3일", 1f);
+        }
+        else this.setFeature("DURATION_CATEGORY_3박 4일 이상", 1f);
+
+        String place = requestDto.place().toString();
+        this.setFeature("LOCATION_"+ place, 1f);
+
+        //Todo 외부 api와 연동하여 휴일 여부 받아오기.
+        this.setFeature("IS_HOLIDAY", 0f);
+
         return new ArrayList<>(features.values());
     }
 }

@@ -112,30 +112,8 @@ public class TripController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     public ApiResponse<PredictResponseDto> predictTrip(@RequestBody PredictRequestDto requestDto){
-        try {
-            // feature 생성
-            List<Float> features = tripService.predictBudget(requestDto);
-
-            // Flask 서버로 전달
-            String url = "http://localhost:5000/predict";
-            Map<String, Object> body = Map.of("features", features);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-            Double predicted = (Double) response.getBody().get("predicted_total_cost");
-
-
-            PredictResponseDto responseDto = new PredictResponseDto(predicted.intValue()+" 원");
-
-            return ApiResponse.onSuccess(responseDto);
-
-        } catch (Exception e) {
-            throw new ErrorHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
-        }
-
+        PredictResponseDto responseDto = tripService.predictBudget(requestDto);
+        return ApiResponse.onSuccess(responseDto);
     }
 
     /*

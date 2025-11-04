@@ -9,12 +9,9 @@ import graduation.project.DoDutch_server.domain.trip.converter.TripMemberConvert
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.*;
-import graduation.project.DoDutch_server.domain.trip.dto.Response.ChatGPTResponseDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.*;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
-import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.converter.TripConverter;
-import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
@@ -24,7 +21,12 @@ import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHa
 import graduation.project.DoDutch_server.global.config.openai.OpenAiConfig;
 import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Period;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -44,12 +45,14 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
-    private final OpenAiConfig openAiConfig;
+    private final RestTemplate restTemplate;
 
     @Value("${openai.model}")
     private String model;
     @Value("${openai.api.url}")
     private String apiUrl;
+    @Value("${flask.url}")
+    private String flaskUrl;
     private final AuthUtils authUtils;
 
     /*
@@ -266,45 +269,22 @@ public class TripServiceImpl implements TripService{
      */
     @Override
     @Transactional
-    public List<Float> predictBudget(PredictRequestDto requestDto) {
+    public PredictResponseDto predictBudget(PredictRequestDto requestDto) {
 
         Long userId = AuthUtils.getCurrentMemberId();
         isPremiumMember(userId);
 
-        FeatureDto featureDto = new FeatureDto();
+        List<Float> features = new FeatureDto().setFeatures(requestDto);
 
-        Long numCompanion = requestDto.numCompanions();
-        featureDto.setFeature("NUM_COMPANIONS", (float)numCompanion);
+        Map<String,Object> body = Map.of("features", features);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String,Object>> entity = new HttpEntity<>(body, headers);
 
-        int month = requestDto.startDate().getMonthValue();
-        featureDto.setFeature("MONTH", (float) month);
-
-        Period period = Period.between(requestDto.startDate(), requestDto.endDate());
-        int days = period.getDays();
-        if (days == 0) featureDto.setFeature("DURATION_CATEGORY_당일", 1f);
-        else if (days == 1) {
-            featureDto.setFeature("DURATION_CATEGORY_1박 2일", 1f);
-        }
-        else if (days == 2) {
-            featureDto.setFeature("DURATION_CATEGORY_2박 3일", 1f);
-        }
-        else featureDto.setFeature("DURATION_CATEGORY_3박 4일 이상", 1f);
-
-        String place = requestDto.place().toString();
-        featureDto.setFeature("LOCATION_"+ place, 1f);
-
-        System.out.println("DAYS: "+days);
-        System.out.println("NUM_COMPANIONS: "+numCompanion);
-        System.out.println("MONTH: "+month);
-        System.out.println("LOCATION: "+place);
-        System.out.println("IS_HOLIDAY: False");
-        System.out.println(featureDto.toValueList());
-
-
-        //Todo 외부 api와 연동하여 휴일 여부 받아오기.
-        featureDto.setFeature("IS_HOLIDAY", 0f);
-
-        return featureDto.toValueList();
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> response = restTemplate.postForEntity(flaskUrl, entity, Map.class);
+        Double predict = (Double) response.getBody().get("predicted_total_cost");
+        return new PredictResponseDto(predict.intValue()+"원");
     }
 
     /*
@@ -317,8 +297,6 @@ public class TripServiceImpl implements TripService{
     ){
         Long userId = AuthUtils.getCurrentMemberId();
         isPremiumMember(userId);
-
-        RestTemplate restTemplate = openAiConfig.restTemplate();
 
         String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
         ChatGPTRequestDto chatGPTRequestDto = ChatGPTRequestDto.gptRequest(model, prompt);
