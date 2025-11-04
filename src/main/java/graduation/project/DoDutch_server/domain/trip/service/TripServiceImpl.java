@@ -2,6 +2,10 @@ package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.FeatureDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.*;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.ChatGPTResponseDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
@@ -27,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Period;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -79,7 +84,7 @@ public class TripServiceImpl implements TripService{
      */
     private String saveImageToLocal(MultipartFile file) throws IOException {
         //저장할 이미지 경로 생성
-        String uploadDir = "C:/Users/kimhy/Desktop/Backend/uploads/";
+        String uploadDir = "C:/Users/lee07/Desktop/upload/";
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(uploadDir + fileName);
 
@@ -87,7 +92,7 @@ public class TripServiceImpl implements TripService{
         Files.createDirectories(filePath.getParent());
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return "C:/Users/kimhy/Desktop/Backend/uploads/" + fileName;
+        return filePath.toString();
     }
 
 
@@ -180,6 +185,49 @@ public class TripServiceImpl implements TripService{
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
         return TripConverter.toDetailDto(optionalTrip.get());
+    }
+
+    /*
+    여행 경비 예측
+     */
+    @Override
+    @Transactional
+    public List<Float> predictBudget(PredictRequestDto requestDto) {
+
+        FeatureDto featureDto = new FeatureDto();
+
+        Long numCompanion = requestDto.numCompanions();
+        featureDto.setFeature("NUM_COMPANIONS", (float)numCompanion);
+
+        int month = requestDto.startDate().getMonthValue();
+        featureDto.setFeature("MONTH", (float) month);
+
+        Period period = Period.between(requestDto.startDate(), requestDto.endDate());
+        int days = period.getDays();
+        if (days == 0) featureDto.setFeature("DURATION_CATEGORY_당일", 1f);
+        else if (days == 1) {
+            featureDto.setFeature("DURATION_CATEGORY_1박 2일", 1f);
+        }
+        else if (days == 2) {
+            featureDto.setFeature("DURATION_CATEGORY_2박 3일", 1f);
+        }
+        else featureDto.setFeature("DURATION_CATEGORY_3박 4일 이상", 1f);
+
+        String place = requestDto.place().toString();
+        featureDto.setFeature("LOCATION_"+ place, 1f);
+
+        System.out.println("DAYS: "+days);
+        System.out.println("NUM_COMPANIONS: "+numCompanion);
+        System.out.println("MONTH: "+month);
+        System.out.println("LOCATION: "+place);
+        System.out.println("IS_HOLIDAY: False");
+        System.out.println(featureDto.toValueList());
+
+
+        //Todo 외부 api와 연동하여 휴일 여부 받아오기.
+        featureDto.setFeature("IS_HOLIDAY", 0f);
+
+        return featureDto.toValueList();
     }
 
     /*
