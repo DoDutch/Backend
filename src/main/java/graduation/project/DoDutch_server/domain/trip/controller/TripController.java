@@ -2,8 +2,6 @@ package graduation.project.DoDutch_server.domain.trip.controller;
 
 import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.PredictResponseDto;
-import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
-import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripSuggestionRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
@@ -17,16 +15,11 @@ import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/trip")

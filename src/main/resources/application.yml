@@ -4,8 +4,7 @@ spring:
     # ?? ?? DB ?? ????
     url: jdbc:mysql://localhost:3306/dodutch
     username: root
-#    password: Rlahdduq2@
-    password: 8106 # 상훈
+    password: Rlahdduq2@
 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -30,6 +29,17 @@ kakao:
 # JWT Configuration
 jwt:
   secret-key: 9kL2mN5pQ8rS1tU4vW7xY0zA3bC6dE9fG2hJ5kM8nP1qR4sT7uV0wX3yZ6aB9cD
+
+server:
+  port: 8080
+
+kakaopay:
+  base-url: https://open-api.kakaopay.com
+  cid: TC0ONETIME
+  secret-key:  DEVC56DFA63477D6EF5019F3605DCFA06AC99F37 #개발용
+  approval-url: http://localhost:8080/api/kakaopay/approve-callback
+  cancel-url: http://localhost:8080/api/kakaopay/cancel-callback
+  fail-url: http://localhost:8080/api/kakaopay/fail-callback
 
 # OpenAI Configuration
 openai:
