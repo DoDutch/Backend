@@ -41,7 +41,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 여행 관련 응답
     TRIP_NOT_EXIST(HttpStatus.NOT_FOUND, "TRIP4001", "존재하지 않는 여행입니다."),
-    TRIP_MEMBER_EXIST(HttpStatus.BAD_REQUEST, "TRIP4002", "이미 존재하는 여행 멤버입니다."),
+    TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "TRIP4002", "해당하는 여행 목록이 없습니다."),
+    TRIP_MEMBER_EXIST(HttpStatus.BAD_REQUEST, "TRIP4003", "이미 존재하는 여행 멤버입니다."),
+    TRIP_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "TRIP4004", "존재하지 않는 여행 멤버입니다.")
     ;
 
     private final HttpStatus httpStatus;
