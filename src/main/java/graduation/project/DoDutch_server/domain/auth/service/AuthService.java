@@ -5,13 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graduation.project.DoDutch_server.domain.auth.dto.KakaoInfoDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.KakaoMemberAndExistDTO;
+import graduation.project.DoDutch_server.domain.auth.dto.request.NicknameRequestDto;
 import graduation.project.DoDutch_server.domain.auth.dto.request.RefreshRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.request.SignupRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.KakaoResponseDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.RefreshResponseDTO;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.config.jwt.JwtTokenProvider;
+import graduation.project.DoDutch_server.global.util.AuthUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -112,6 +116,7 @@ public class AuthService {
         KakaoInfoDTO kakaoInfoDto = new KakaoInfoDTO(userAttributesByToken);
         Member member = Member.builder()
                 .kakaoId(kakaoInfoDto.getKakaoId())
+                .role(Role.MEMBER)
                 .build();
 
         boolean existMember = false;
@@ -161,6 +166,7 @@ public class AuthService {
 
         Member member = memberRepository.findByKakaoId(kakaoId);
 
+        checkNickname(new NicknameRequestDto(nickname));
         member.setNickname(nickname);
 
     }
@@ -199,6 +205,7 @@ public class AuthService {
         if (member == null) {
             member = Member.builder()
                     .kakaoId(kakaoId)
+                    .role(Role.MEMBER)
                     .build();
             memberRepository.save(member);
             isExistingMember = false;
@@ -218,5 +225,15 @@ public class AuthService {
                 .build();
     }
 
+    // 닉네임 중복 확인
+    @Transactional
+    public void checkNickname(NicknameRequestDto requestDto) {
+        String nickname = requestDto.nickname();
+        if (nickname == null || nickname.isEmpty()) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_NICKNAME_INVALID);
+        }
 
+        if (!memberRepository.validateNickname(nickname))
+            throw new ErrorHandler(ErrorStatus.MEMBER_NICKNAME_EXIST);
+    }
 }

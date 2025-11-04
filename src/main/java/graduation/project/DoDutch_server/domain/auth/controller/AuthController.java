@@ -1,17 +1,19 @@
 package graduation.project.DoDutch_server.domain.auth.controller;
 
 import graduation.project.DoDutch_server.domain.auth.dto.request.KakaoRequestDTO;
+import graduation.project.DoDutch_server.domain.auth.dto.request.NicknameRequestDto;
 import graduation.project.DoDutch_server.domain.auth.dto.request.RefreshRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.request.SignupRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.KakaoResponseDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.RefreshResponseDTO;
 import graduation.project.DoDutch_server.domain.auth.service.AuthService;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.context.annotation.Profile;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,5 +53,18 @@ public class AuthController {
         log.info("[DEV] Development login requested for kakaoId: {}", kakaoId);
         KakaoResponseDTO response = authService.createTokensForDev(kakaoId);
         return ApiResponse.onSuccess(response);
+    }
+
+    /*
+     * 닉네임 중복 확인
+     */
+    @PostMapping("/check/nickname")
+    @Operation(summary = "닉네임 중복 확인 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<Void> checkNickname(@RequestBody NicknameRequestDto requestDto) {
+        authService.checkNickname(requestDto);
+        return ApiResponse.onSuccess();
     }
 }

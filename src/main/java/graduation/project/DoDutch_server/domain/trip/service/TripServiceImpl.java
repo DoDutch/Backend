@@ -1,21 +1,31 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.FeatureDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.*;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.ChatGPTResponseDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.converter.TripConverter;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.global.config.openai.OpenAiConfig;
+import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Period;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -31,6 +42,12 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
+    private final OpenAiConfig openAiConfig;
+
+    @Value("${openai.model}")
+    private String model;
+    @Value("${openai.api.url}")
+    private String apiUrl;
 
     /*
     여행 생성
@@ -69,7 +86,7 @@ public class TripServiceImpl implements TripService{
      */
     private String saveImageToLocal(MultipartFile file) throws IOException {
         //저장할 이미지 경로 생성
-        String uploadDir = "C:/Users/Lee Jewon/Pictures/image/";
+        String uploadDir = "C:/Users/lee07/Desktop/upload/";
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(uploadDir + fileName);
 
@@ -77,8 +94,9 @@ public class TripServiceImpl implements TripService{
         Files.createDirectories(filePath.getParent());
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return "C:/Users/Lee Jewon/Pictures/image/" + fileName;
+        return filePath.toString();
     }
+
 
     /*
     여행 참여
@@ -169,5 +187,78 @@ public class TripServiceImpl implements TripService{
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) throw new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST);
         return TripConverter.toDetailDto(optionalTrip.get());
+    }
+
+    private void isPremiumMember(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (!member.getRole().equals(Role.PREMIUM))
+            throw new ErrorHandler(ErrorStatus._FORBIDDEN);
+    }
+
+    /*
+    여행 경비 예측
+     */
+    @Override
+    @Transactional
+    public List<Float> predictBudget(PredictRequestDto requestDto) {
+
+        Long userId = AuthUtils.getCurrentMemberId();
+        isPremiumMember(userId);
+
+        FeatureDto featureDto = new FeatureDto();
+
+        Long numCompanion = requestDto.numCompanions();
+        featureDto.setFeature("NUM_COMPANIONS", (float)numCompanion);
+
+        int month = requestDto.startDate().getMonthValue();
+        featureDto.setFeature("MONTH", (float) month);
+
+        Period period = Period.between(requestDto.startDate(), requestDto.endDate());
+        int days = period.getDays();
+        if (days == 0) featureDto.setFeature("DURATION_CATEGORY_당일", 1f);
+        else if (days == 1) {
+            featureDto.setFeature("DURATION_CATEGORY_1박 2일", 1f);
+        }
+        else if (days == 2) {
+            featureDto.setFeature("DURATION_CATEGORY_2박 3일", 1f);
+        }
+        else featureDto.setFeature("DURATION_CATEGORY_3박 4일 이상", 1f);
+
+        String place = requestDto.place().toString();
+        featureDto.setFeature("LOCATION_"+ place, 1f);
+
+        System.out.println("DAYS: "+days);
+        System.out.println("NUM_COMPANIONS: "+numCompanion);
+        System.out.println("MONTH: "+month);
+        System.out.println("LOCATION: "+place);
+        System.out.println("IS_HOLIDAY: False");
+        System.out.println(featureDto.toValueList());
+
+
+        //Todo 외부 api와 연동하여 휴일 여부 받아오기.
+        featureDto.setFeature("IS_HOLIDAY", 0f);
+
+        return featureDto.toValueList();
+    }
+
+    /*
+    gpt 여행지 추천
+     */
+    @Override
+    @Transactional
+    public TripSuggestionResponseDto recommendTrip(
+            TripSuggestionRequestDto requestDto
+    ){
+        Long userId = AuthUtils.getCurrentMemberId();
+        isPremiumMember(userId);
+
+        RestTemplate restTemplate = openAiConfig.restTemplate();
+
+        String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
+        ChatGPTRequestDto chatGPTRequestDto = ChatGPTRequestDto.gptRequest(model, prompt);
+
+        ChatGPTResponseDto chatGPTResponseDto = restTemplate.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
+        return new TripSuggestionResponseDto(chatGPTResponseDto.choices().get(0).message().content());
     }
 }
