@@ -2,9 +2,10 @@
 spring:
   datasource:
     # ?? ?? DB ?? ????
-    url: jdbc:mysql://localhost:3306/do_doutch
+    url: jdbc:mysql://localhost:3306/dodutch
     username: root
-    password: 8106
+#    password: Rlahdduq2@
+    password: 8106 # 상훈
 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -29,3 +30,10 @@ kakao:
 # JWT Configuration
 jwt:
   secret-key: 9kL2mN5pQ8rS1tU4vW7xY0zA3bC6dE9fG2hJ5kM8nP1qR4sT7uV0wX3yZ6aB9cD
+
+# OpenAI Configuration
+openai:
+  model: gpt-5
+  api:
+    key: ${OPEN_AI_API_KEY}
+    url: https://api.openai.com/v1/chat/completions

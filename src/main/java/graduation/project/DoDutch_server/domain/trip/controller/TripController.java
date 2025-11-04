@@ -4,6 +4,8 @@ import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestD
 import graduation.project.DoDutch_server.domain.trip.dto.Response.PredictResponseDto;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.domain.trip.dto.Request.TripSuggestionRequestDto;
+import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
@@ -11,6 +13,7 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResp
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.service.TripServiceImpl;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -132,5 +135,20 @@ public class TripController {
             throw new ErrorHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    /*
+     * gpt 여행지 추천
+     */
+    @PostMapping("/chat")
+    @Operation(summary = "여행지 추천 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<TripSuggestionResponseDto> tripRecommend(
+            @RequestBody TripSuggestionRequestDto requestDto
+            ){
+        TripSuggestionResponseDto responseDto = tripService.recommendTrip(requestDto);
+        return ApiResponse.onSuccess(responseDto);
     }
 }
