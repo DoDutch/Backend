@@ -20,6 +20,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // 멤버 관련 응답
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4001", "멤버가 없습니다."),
     MEMBER_NICKNAME_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "중복된 닉네임입니다"),
+    MEMBER_NICKNAME_EQUAL(HttpStatus.BAD_REQUEST, "MEMBER4002", "기존과 동일한 닉네임입니다"),
+    MEMBER_NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "MEMBER4002", "불가능한 닉네임입니다"),
 
     // 지출 관련 응답
     EXPENSE_NOT_EXIST(HttpStatus.NOT_FOUND, "EXPENSE4001", "존재하지 않는 지출입니다."),

@@ -110,6 +110,10 @@ public class TripController {
      * 여행 경비 예측
      */
     @PostMapping("/predict")
+    @Operation(summary = "여행 경비 예측 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<PredictResponseDto> predictTrip(@RequestBody PredictRequestDto requestDto){
         try {
             // feature 생성
