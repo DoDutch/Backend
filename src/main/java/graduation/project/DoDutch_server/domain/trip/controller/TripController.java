@@ -27,7 +27,6 @@ import java.util.List;
 @Tag(name = "Trip", description = "여행 관련 API")
 public class TripController {
     private final TripServiceImpl tripService;
-    private final RestTemplate restTemplate =  new RestTemplate();
 
     /*
      * 여행 생성

@@ -18,10 +18,8 @@ import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
-import graduation.project.DoDutch_server.global.config.openai.OpenAiConfig;
 import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +43,7 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
-    private final RestTemplate restTemplate;
+    private final RestTemplate template;
 
     @Value("${openai.model}")
     private String model;
@@ -301,7 +299,7 @@ public class TripServiceImpl implements TripService{
         String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
         ChatGPTRequestDto chatGPTRequestDto = ChatGPTRequestDto.gptRequest(model, prompt);
 
-        ChatGPTResponseDto chatGPTResponseDto = restTemplate.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
+        ChatGPTResponseDto chatGPTResponseDto = template.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
         return new TripSuggestionResponseDto(chatGPTResponseDto.choices().get(0).message().content());
     }
 }
