@@ -33,6 +33,14 @@ public class JwtFilter extends GenericFilterBean {
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
         logger.info("[JwtFilter] : " + httpServletRequest.getRequestURL().toString());
 
+        String uri = httpServletRequest.getRequestURI();
+
+        // ✅ KakaoPay Callback은 인증 필터 무시
+        if (uri.startsWith("/api/kakaopay/")) {
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
+            return;
+        }
+
         // resolveToken 메소드를 호출하여 HTTP 요청 헤더에서 access token을 추출
         String jwt = resolveToken(httpServletRequest);
 
