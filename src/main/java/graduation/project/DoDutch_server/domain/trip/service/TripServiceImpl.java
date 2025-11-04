@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.FeatureDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
@@ -19,6 +20,7 @@ import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.config.openai.OpenAiConfig;
+import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -187,12 +189,22 @@ public class TripServiceImpl implements TripService{
         return TripConverter.toDetailDto(optionalTrip.get());
     }
 
+    private void isPremiumMember(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (!member.getRole().equals(Role.PREMIUM))
+            throw new ErrorHandler(ErrorStatus._FORBIDDEN);
+    }
+
     /*
     여행 경비 예측
      */
     @Override
     @Transactional
     public List<Float> predictBudget(PredictRequestDto requestDto) {
+
+        Long userId = AuthUtils.getCurrentMemberId();
+        isPremiumMember(userId);
 
         FeatureDto featureDto = new FeatureDto();
 
@@ -238,6 +250,9 @@ public class TripServiceImpl implements TripService{
     public TripSuggestionResponseDto recommendTrip(
             TripSuggestionRequestDto requestDto
     ){
+        Long userId = AuthUtils.getCurrentMemberId();
+        isPremiumMember(userId);
+
         RestTemplate restTemplate = openAiConfig.restTemplate();
 
         String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
