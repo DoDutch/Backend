@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface DutchRepository extends JpaRepository<Dutch, Long> {
     List<Dutch> findByTripId(Long tripId);
+    List<Dutch> findByPayeeId(Long memberId);
+    List<Dutch> findByPayerId(Long memberId);
 }

@@ -161,4 +161,12 @@ public class ExpenseService {
 
     }
 
+    @Transactional
+    public void deleteMember(Long memberId){
+        List<Expense> expenses = expenseRepository.findByPayerId(memberId);
+        for (Expense expense : expenses) {
+            expense.setPayer(null);
+        }
+    }
+
 }

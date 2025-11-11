@@ -196,6 +196,7 @@ public class TripServiceImpl implements TripService{
         for (Trip trip : trips) {
             List<TripMember> tripMemberList = trip.getTripMembers();
             for (TripMember tripMember : tripMemberList) {
+                if (tripMember.getMember() == null) continue;
                 String name = tripMember.getMember().getName();
                 if (name == null || name.isEmpty()) continue; // 멤버 이름이 비어있으면 넘어간다.
                 if (name.contains(keyword)) {
@@ -301,5 +302,13 @@ public class TripServiceImpl implements TripService{
 
         ChatGPTResponseDto chatGPTResponseDto = template.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
         return new TripSuggestionResponseDto(chatGPTResponseDto.choices().get(0).message().content());
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId){
+        List<TripMember> tripMembers = tripMemberRepository.findByMemberId(memberId);
+        for (TripMember tripMember : tripMembers) {
+            tripMember.setMember(null);
+        }
     }
 }

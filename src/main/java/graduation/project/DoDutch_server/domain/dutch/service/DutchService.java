@@ -193,4 +193,16 @@ public class DutchService {
         dutchRepository.save(dutch);
         return toDutchResponseDTO(dutch);
     }
+
+    @Transactional
+    public void deleteMember(Long memberId){
+        List<Dutch> dutches = dutchRepository.findByPayerId(memberId);
+        for (Dutch dutch : dutches) {
+            dutch.setPayer(null);
+        }
+        dutches = dutchRepository.findByPayeeId(memberId);
+        for (Dutch dutch : dutches) {
+            dutch.setPayee(null);
+        }
+    }
 }
