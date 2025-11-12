@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ApiResponseStatus {
     REQUEST_SUCCESS(true, "S200", "요청에 성공했습니다.");
 
-    private final boolean isSuccess;
+    private final boolean success;
     private final String status;
     private final String message;
 }

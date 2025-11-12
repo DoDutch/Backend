@@ -48,7 +48,7 @@ public class TripConverter {
         return tripMembers.stream()
                 .map(member -> TripMemberDTO.builder()
                         .memberId(member.getMember().getId())
-                        .nickName(member.getMember().getNickname())
+                        .nickname(member.getMember().getNickname())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -81,7 +81,7 @@ public class TripConverter {
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
                 .tripName(trip.getName())
-                .stratDate(trip.getStartDate())
+                .startDate(trip.getStartDate())
                 .endDate(trip.getEndDate())
                 .place(trip.getPlace())
                 .totalCost(trip.getTotalCost())
@@ -100,7 +100,7 @@ public class TripConverter {
                 .map(trip -> TripDetailResponseDTO.builder()
                         .tripId(trip.getId())
                         .tripName(trip.getName())
-                        .stratDate(trip.getStartDate())
+                        .startDate(trip.getStartDate())
                         .endDate(trip.getEndDate())
                         .place(trip.getPlace())
                         .totalCost(trip.getTotalCost())

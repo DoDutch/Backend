@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TripMemberDTO {
-    private Long memberId; // 멤버 id
-    private String nickName; // 멤버 별명
+    private Long memberId;
+    private String nickname;
 }
