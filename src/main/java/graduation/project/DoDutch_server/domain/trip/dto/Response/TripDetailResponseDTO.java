@@ -18,7 +18,7 @@ import java.util.List;
 public class TripDetailResponseDTO {
     private Long tripId;
     private String tripName;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
     private String place;
     private Integer totalCost;
