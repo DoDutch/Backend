@@ -1,10 +1,9 @@
 package graduation.project.DoDutch_server.domain.auth.controller;
 
-import graduation.project.DoDutch_server.domain.auth.dto.request.KakaoRequestDTO;
-import graduation.project.DoDutch_server.domain.auth.dto.request.NicknameRequestDto;
-import graduation.project.DoDutch_server.domain.auth.dto.request.RefreshRequestDTO;
-import graduation.project.DoDutch_server.domain.auth.dto.request.SignupRequestDTO;
+import graduation.project.DoDutch_server.domain.auth.dto.request.*;
 import graduation.project.DoDutch_server.domain.auth.dto.response.KakaoResponseDTO;
+import graduation.project.DoDutch_server.domain.auth.dto.response.PayPremiumApproveResponseDto;
+import graduation.project.DoDutch_server.domain.auth.dto.response.PayPremiumReadyResponseDto;
 import graduation.project.DoDutch_server.domain.auth.dto.response.RefreshResponseDTO;
 import graduation.project.DoDutch_server.domain.auth.service.AuthService;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
@@ -14,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,5 +67,31 @@ public class AuthController {
     public ApiResponse<Void> checkNickname(@RequestBody NicknameRequestDto requestDto) {
         authService.checkNickname(requestDto);
         return ApiResponse.onSuccess();
+    }
+
+    @PostMapping("/premium")
+    public ApiResponse<PayPremiumReadyResponseDto> premium(
+            @RequestBody PayPremiumReadyRequestDto requestDto
+    ) {
+        PayPremiumReadyResponseDto responseDto = authService.premium(requestDto);
+        return ApiResponse.onSuccess(responseDto);
+    }
+
+    @GetMapping("/approve-callback")
+    public void approve(
+            @RequestParam("partner_order_id") String partnerOrderId,
+            @RequestParam("pg_token") String pgToken,
+            HttpServletResponse response
+    ) throws IOException {
+
+        PayPremiumApproveResponseDto result = authService.approve(partnerOrderId, pgToken);
+
+        String redirectUrl =
+                "http://localhost:3000/payment/success"
+                        + "?tid=" + result.tid()
+                        + "&buyerId=" + result.buyerId()
+                        + "&amount=" + result.amount();
+
+        response.sendRedirect(redirectUrl);
     }
 }

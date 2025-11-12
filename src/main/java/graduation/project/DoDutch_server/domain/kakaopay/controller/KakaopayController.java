@@ -4,12 +4,10 @@ package graduation.project.DoDutch_server.domain.kakaopay.controller;
 import graduation.project.DoDutch_server.domain.kakaopay.dto.PayApproveResponseDto;
 import graduation.project.DoDutch_server.domain.kakaopay.dto.PayReadyRequestDto;
 import graduation.project.DoDutch_server.domain.kakaopay.dto.PayReadyResponseDto;
-import graduation.project.DoDutch_server.domain.kakaopay.service.KakaopayService;
 import graduation.project.DoDutch_server.domain.kakaopay.service.PaymentService;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,7 +17,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class KakaopayController {
 
-    private final KakaopayService kakaopayService;
     private final PaymentService paymentService;
 
     @PostMapping("/ready")

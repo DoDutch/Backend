@@ -8,6 +8,7 @@ import graduation.project.DoDutch_server.domain.kakaopay.entity.PaymentOrder;
 import graduation.project.DoDutch_server.domain.kakaopay.repository.PaymentOrderRepository;
 import graduation.project.DoDutch_server.domain.kakaopay.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,9 @@ public class PaymentService {
     private final KakaopayService kakaopayService;
     private final PaymentOrderRepository orderRepository;
     private final WalletRepository walletRepository;
+
+    @Value("${kakaopay.premium-approval-url}")
+    private String approvalUrl;
 
     private String newPartnerOrderId() {
         return "ORDER_" + UUID.randomUUID();
@@ -36,7 +40,7 @@ public class PaymentService {
         orderRepository.save(order);
 
         Map<String, Object> r = kakaopayService.ready(
-                partnerOrderId, req.getRecipientUserId(), order.getItemName(), order.getAmount());
+                partnerOrderId, req.getRecipientUserId(), order.getItemName(), order.getAmount(), approvalUrl);
 
         order.applyTid((String) r.get("tid"));
 

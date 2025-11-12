@@ -6,16 +6,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graduation.project.DoDutch_server.domain.auth.dto.KakaoInfoDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.KakaoMemberAndExistDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.request.NicknameRequestDto;
+import graduation.project.DoDutch_server.domain.auth.dto.request.PayPremiumReadyRequestDto;
 import graduation.project.DoDutch_server.domain.auth.dto.request.RefreshRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.request.SignupRequestDTO;
 import graduation.project.DoDutch_server.domain.auth.dto.response.KakaoResponseDTO;
+import graduation.project.DoDutch_server.domain.auth.dto.response.PayPremiumApproveResponseDto;
+import graduation.project.DoDutch_server.domain.auth.dto.response.PayPremiumReadyResponseDto;
 import graduation.project.DoDutch_server.domain.auth.dto.response.RefreshResponseDTO;
+import graduation.project.DoDutch_server.domain.kakaopay.entity.PaymentOrder;
+import graduation.project.DoDutch_server.domain.kakaopay.repository.PaymentOrderRepository;
+import graduation.project.DoDutch_server.domain.kakaopay.service.KakaopayService;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.config.jwt.JwtTokenProvider;
-import graduation.project.DoDutch_server.global.util.AuthUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +41,7 @@ import graduation.project.DoDutch_server.global.common.exception.GeneralExceptio
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -43,12 +49,17 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final KakaopayService kakaopayService;
+    private final PaymentOrderRepository  paymentOrderRepository;
 
     @Value("${kakao.client-id}")
     private String clientId;
 
     @Value("${kakao.redirect-url}")
     private String redirectUrl;
+
+    @Value("${kakaopay.premium-approval-url}")
+    private String premiumApprovalUrl;
 
     // 카카오 로그인
     @Transactional
@@ -235,5 +246,70 @@ public class AuthService {
 
         if (!memberRepository.validateNickname(nickname))
             throw new ErrorHandler(ErrorStatus.MEMBER_NICKNAME_EXIST);
+    }
+
+    private String createPartnerOrderId(){
+        return "ORDER_" + UUID.randomUUID();
+    }
+
+    @Transactional
+    public PayPremiumReadyResponseDto premium(PayPremiumReadyRequestDto requestDto) {
+        String partnerOrderId = createPartnerOrderId();
+        Member member = memberRepository.findById(Long.parseLong(requestDto.payerUserId()))
+                .orElseThrow(()->new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (member.getRole() == Role.PREMIUM)
+            throw new ErrorHandler(ErrorStatus.MEMBER_ALREADY_SUBSCRIBED);
+
+        PaymentOrder paymentOrder = PaymentOrder.create(
+                partnerOrderId,
+                "두더치",
+                member.getId().toString(),
+                "DoDutch Premium",
+                requestDto.amount());
+        paymentOrderRepository.save(paymentOrder);
+
+        Map<String, Object> r = kakaopayService.ready(
+                partnerOrderId,
+                paymentOrder.getPartnerUserId(),
+                paymentOrder.getItemName(),
+                paymentOrder.getAmount(),
+                premiumApprovalUrl);
+
+        paymentOrder.applyTid((String)r.get("tid"));
+
+        return new PayPremiumReadyResponseDto(
+                partnerOrderId,
+                paymentOrder.getKakaoTid(),
+                (String) r.get("next_redirect_pc_url")
+        );
+    }
+
+    @Transactional
+    public PayPremiumApproveResponseDto approve(
+            String partnerOrderId,
+            String pgToken
+    ) {
+        PaymentOrder paymentOrder = paymentOrderRepository.findByPartnerOrderId(partnerOrderId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.ORDER_NOT_EXIST));
+
+        kakaopayService.approve(
+                paymentOrder.getKakaoTid(),
+                partnerOrderId,
+                paymentOrder.getPartnerUserId(),
+                pgToken
+        );
+
+        paymentOrder.approve();
+        Member member = memberRepository.findById(Long.parseLong(paymentOrder.getPayerUserId()))
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        member.setRole(Role.PREMIUM);
+
+        return new PayPremiumApproveResponseDto(
+                paymentOrder.getKakaoTid(),
+                "APPROVED",
+                paymentOrder.getPartnerUserId(),
+                paymentOrder.getAmount(),
+                "결제 성공!"
+        );
     }
 }
