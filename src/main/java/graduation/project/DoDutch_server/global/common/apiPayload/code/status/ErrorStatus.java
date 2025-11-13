@@ -38,6 +38,10 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4003", "유효하지 않은 리프레시 토큰입니다."),
     NOT_EXIST_USER(HttpStatus.NOT_FOUND, "AUTH4004", "존재하지 않는 사용자입니다."),
 
+    // 카카오 API 관련 응답
+    KAKAO_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "KAKAO4001", "카카오 액세스 토큰이 유효하지 않거나 만료되었습니다. 다시 로그인해주세요."),
+    KAKAO_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO5001", "카카오 API 호출에 실패했습니다. 잠시 후 다시 시도해주세요."),
+
     // 기타
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND,"CATEGORY4001", "카테고리가 없습니다."),
 

@@ -7,5 +7,4 @@ import lombok.NoArgsConstructor;
 @Getter
 public class SignupRequestDTO {
     private String nickname;
-    private String accessToken;
 }

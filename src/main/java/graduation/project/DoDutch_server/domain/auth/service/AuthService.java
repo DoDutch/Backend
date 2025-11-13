@@ -61,7 +61,7 @@ public class AuthService {
     @Value("${kakaopay.premium-approval-url}")
     private String premiumApprovalUrl;
 
-    // 카카오 로그인
+    // 카카오 로그인 (웹 OAuth 플로우용: authorization code → access token 교환)
     @Transactional
     public KakaoResponseDTO loginWithKakao(String accessCode, HttpServletResponse response) {
         String accessToken = getAccessToken(accessCode);
@@ -71,6 +71,32 @@ public class AuthService {
         Optional<Member> findMember = memberRepository.findById(kakaoMemberAndExistDTO.getMember().getId());
 
         return getKakaoTokens(kakaoMemberAndExistDTO.getMember().getKakaoId(), kakaoMemberAndExistDTO.isExistingMember(), response);
+    }
+
+    // 카카오 로그인 (모바일 SDK용: 이미 획득한 access token 직접 사용)
+    @Transactional
+    public KakaoResponseDTO loginWithKakaoToken(String accessToken, HttpServletResponse response) {
+
+        if (accessToken == null || accessToken.trim().isEmpty()) {
+            throw new GeneralException(ErrorStatus.INVALID_ACCESS_TOKEN);
+        }
+
+        try {
+            // OAuth 인증 코드 교환 과정을 건너뛰고 직접 액세스 토큰 사용
+            KakaoMemberAndExistDTO kakaoMemberAndExistDTO = getUserProfileByToken(accessToken);
+
+            Optional<Member> findMember = memberRepository.findById(kakaoMemberAndExistDTO.getMember().getId());
+
+            KakaoResponseDTO result = getKakaoTokens(kakaoMemberAndExistDTO.getMember().getKakaoId(),
+                                                     kakaoMemberAndExistDTO.isExistingMember(),
+                                                     response);
+            return result;
+
+        } catch (GeneralException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GeneralException(ErrorStatus.KAKAO_API_ERROR);
+        }
     }
 
     private String getAccessToken(String accessCode) {
@@ -110,14 +136,31 @@ public class AuthService {
 
     // 카카오 API 호출해서 AccessToken으로 유저정보 가져오기(id)
     public Map<String, Object> getUserAttributesByToken(String accessToken){
-        return WebClient.create()
-                .get()
-                .uri("https://kapi.kakao.com/v2/user/me")
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
+        try {
+            Map<String, Object> userAttributes = WebClient.create()
+                    .get()
+                    .uri("https://kapi.kakao.com/v2/user/me")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
+                    .retrieve()
+                    .onStatus(
+                            status -> status.is4xxClientError() || status.is5xxServerError(),
+                            clientResponse -> clientResponse.bodyToMono(String.class)
+                                    .map(body -> {
 
+                                        if (clientResponse.statusCode().value() == 401) {
+                                            return new GeneralException(ErrorStatus.KAKAO_TOKEN_INVALID);
+                                        }
+                                        return new GeneralException(ErrorStatus.KAKAO_API_ERROR);
+                                    })
+                    )
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+
+            return userAttributes;
+
+        } catch (Exception e) {
+            throw new GeneralException(ErrorStatus.KAKAO_API_ERROR);
+        }
     }
 
     // 카카오 API에서 가져온 유저정보를 DB에 저장
@@ -165,9 +208,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void signup(SignupRequestDTO signUpRequestDto){
+    public void signup(SignupRequestDTO signUpRequestDto, String accessToken){
         String nickname = signUpRequestDto.getNickname();
-        String accessToken = signUpRequestDto.getAccessToken();
 
         if(!jwtTokenProvider.validateToken(accessToken)||!StringUtils.hasText(accessToken)){
             throw new GeneralException(ErrorStatus.INVALID_ACCESS_TOKEN);
