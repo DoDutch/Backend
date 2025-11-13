@@ -30,10 +30,23 @@ public class AuthController {
         return ApiResponse.onSuccess(kakaoResponseDTO);
     }
 
-    @PostMapping("/signup")
-    public ApiResponse<Object> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    /**
+     * 모바일 앱 전용 카카오 로그인 API
+     */
+    @PostMapping("/kakao/login-token")
+    @Operation(summary = "카카오 로그인 (모바일 SDK 액세스 토큰)", description = "모바일 앱에서 카카오 SDK로 획득한 액세스 토큰으로 로그인")
+    public ApiResponse<KakaoResponseDTO> loginWithToken(@RequestBody KakaoRequestDTO kakaoRequestDTO,
+                                                        HttpServletResponse response) {
+        KakaoResponseDTO kakaoResponseDTO = authService.loginWithKakaoToken(kakaoRequestDTO.getAccessToken(), response);
+        return ApiResponse.onSuccess(kakaoResponseDTO);
+    }
 
-        authService.signup(signupRequestDTO);
+    @PostMapping("/signup")
+    @Operation(summary = "회원가입 API", description = "카카오 로그인 후 닉네임 설정하여 회원가입")
+    public ApiResponse<Object> signup(@RequestBody SignupRequestDTO signupRequestDTO,
+                                      @RequestHeader("Authorization") String authHeader) {
+        String accessToken = authHeader.replace("Bearer ", "");
+        authService.signup(signupRequestDTO, accessToken);
         return ApiResponse.onSuccess();
     }
 
@@ -47,7 +60,6 @@ public class AuthController {
     /**
      * 개발 전용 로그인 API
      * 카카오 OAuth 과정 없이 kakaoId로 바로 JWT 토큰 발급
-     * 프로덕션 환경에서는 비활성화됨
      */
     @PostMapping("/dev-login")
     public ApiResponse<KakaoResponseDTO> devLogin(@RequestParam String kakaoId) {
@@ -59,7 +71,7 @@ public class AuthController {
     /*
      * 닉네임 중복 확인
      */
-    @PostMapping("/check/nickname")
+    @PostMapping("/check-nickname")
     @Operation(summary = "닉네임 중복 확인 API")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
