@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
@@ -22,4 +23,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
                 and m.nickname = :nickname
         """)
     boolean validateNickname(@Param("nickname") String nickname);
+
+    Optional<Member> findByNickname(String nickname);
 }

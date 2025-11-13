@@ -131,7 +131,16 @@ public class ExpenseService {
         List<TripMember> tripMembers = tripMemberRepository.findByTripId(tripId);
 
         List<Member> members = tripMembers.stream() //Member 형태로 변환
-                .map(TripMember::getMember)
+                .map(tripMember -> {
+                    if (tripMember.getMember() == null) {
+                        return Member.builder()
+                                .nickname("알수없음")
+                                .name("알수 없음")
+                                .id(-1L)
+                                .build();
+                    }
+                    else return tripMember.getMember();
+                })
                 .collect(Collectors.toList());
 
         return ExpenseConverter.toAllExpenseResponseDto(budget,remainingCost,expenses, members);
@@ -159,6 +168,14 @@ public class ExpenseService {
 
         return ExpenseConverter.toExpenseByExpenseIdResponseDto(expense, tripName);
 
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId){
+        List<Expense> expenses = expenseRepository.findByPayerId(memberId);
+        for (Expense expense : expenses) {
+            expense.setPayer(null);
+        }
     }
 
 }

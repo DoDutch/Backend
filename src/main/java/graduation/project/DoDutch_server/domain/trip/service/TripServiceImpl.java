@@ -196,6 +196,7 @@ public class TripServiceImpl implements TripService{
         for (Trip trip : trips) {
             List<TripMember> tripMemberList = trip.getTripMembers();
             for (TripMember tripMember : tripMemberList) {
+                if (tripMember.getMember() == null) continue;
                 String name = tripMember.getMember().getName();
                 if (name == null || name.isEmpty()) continue; // 멤버 이름이 비어있으면 넘어간다.
                 if (name.contains(keyword)) {
@@ -296,10 +297,31 @@ public class TripServiceImpl implements TripService{
         Long userId = AuthUtils.getCurrentMemberId();
         isPremiumMember(userId);
 
-        String prompt = requestDto.place() + "/" + requestDto.endDate().toString() + "~" + requestDto.startDate().toString() + "에 맞는 날짜 별 여행지를 계획해서 알려줘.";
+        String prompt = requestDto.place() +
+                "에서" +
+                requestDto.startDate().toString() +
+                "~" + requestDto.endDate().toString() +
+                "동안 날짜별 아침, 점심, 저녁 여행지를 간략하게 해서 2가지 계획안을 최대한 매우매우 정말 빠르게 작성하여 응답하라." +
+                "이때 방문하는 장소는" +
+                requestDto.place() +
+                "에 실제 존재하는 장소로 유명 음식점, 카페의 이름 또는 관광 명소의 이름을 제시한다." +
+                "모든 답변은 불필요한 문장 없이 바로 정답 또는 코드만 제시한다." +
+                "감탄사, 문장부호 이모티콘, 자연스러운 대화체 표현을 포함하지 않는다." +
+                "후속 제안, 추가 설명, 맺음말 없이 끝낸다." +
+                "답변 형식: [1안: ], [2안: ]." +
+                "ex: [1안: 몇 월 며칠 아침: ooo, 점심: ooo, ...], [" ;
+
         ChatGPTRequestDto chatGPTRequestDto = ChatGPTRequestDto.gptRequest(model, prompt);
 
         ChatGPTResponseDto chatGPTResponseDto = template.postForObject(apiUrl, chatGPTRequestDto, ChatGPTResponseDto.class);
         return new TripSuggestionResponseDto(chatGPTResponseDto.choices().get(0).message().content());
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId){
+        List<TripMember> tripMembers = tripMemberRepository.findByMemberId(memberId);
+        for (TripMember tripMember : tripMembers) {
+            tripMember.setMember(null);
+        }
     }
 }

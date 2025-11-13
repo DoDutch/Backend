@@ -22,9 +22,11 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NICKNAME_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "중복된 닉네임입니다"),
     MEMBER_NICKNAME_EQUAL(HttpStatus.BAD_REQUEST, "MEMBER4003", "기존과 동일한 닉네임입니다"),
     MEMBER_NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "MEMBER4004", "불가능한 닉네임입니다"),
+    MEMBER_ALREADY_SUBSCRIBED(HttpStatus.BAD_REQUEST, "MEMBER4005", "프리미엄 구독중입니다."),
 
     // 지출 관련 응답
     EXPENSE_NOT_EXIST(HttpStatus.NOT_FOUND, "EXPENSE4001", "존재하지 않는 지출입니다."),
+    ORDER_NOT_EXIST(HttpStatus.NOT_FOUND, "EXPENSE4002", "존재하지 않는 주문번호입니다."),
 
     // 정산 관련 응답
     DUTCH_NOT_EXIST(HttpStatus.NOT_FOUND, "DUTCH4001", "존재하지 않는 정산입니다."),

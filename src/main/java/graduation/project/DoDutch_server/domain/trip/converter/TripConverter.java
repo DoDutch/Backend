@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.converter;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
+import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripExpenseDTO;
@@ -9,6 +10,7 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDT
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,20 +47,36 @@ public class TripConverter {
 
 
     public static List<TripMemberDTO> toMemberList1(List<TripMember> tripMembers){
-        return tripMembers.stream()
-                .map(member -> TripMemberDTO.builder()
-                        .memberId(member.getMember().getId())
-                        .nickname(member.getMember().getNickname())
-                        .build())
-                .collect(Collectors.toList());
+        List<TripMemberDTO> dtoList = new ArrayList<>();
+
+        for (TripMember tripMember : tripMembers){
+            Member member = tripMember.getMember();
+            if (member == null) dtoList.add(new TripMemberDTO(-1L, "알수없음"));
+            else dtoList.add(new TripMemberDTO(member.getId(), member.getNickname()));
+        }
+        return dtoList;
+//        return tripMembers.stream()
+//                .map(member -> TripMemberDTO.builder()
+//                        .memberId(member.getMember().getId())
+//                        .nickName(member.getMember().getNickname())
+//                        .build())
+//                .collect(Collectors.toList());
     }
 
     public static List<TripMemberDTO> toMemberList2(List<TripMember> tripMembers){
-        return tripMembers.stream()
-                .map(member -> TripMemberDTO.builder()
-                        .memberId(member.getMember().getId())
-                        .build())
-                .collect(Collectors.toList());
+        List<TripMemberDTO> dtoList = new ArrayList<>();
+
+        for (TripMember tripMember : tripMembers){
+            Member member = tripMember.getMember();
+            if (member == null) dtoList.add(new TripMemberDTO(-1L, null));
+            else dtoList.add(new TripMemberDTO(member.getId(), null));
+        }
+        return dtoList;
+//        return tripMembers.stream()
+//                .map(member -> TripMemberDTO.builder()
+//                        .memberId(member.getMember().getId())
+//                        .build())
+//                .collect(Collectors.toList());
     }
 
     public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses){

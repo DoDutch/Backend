@@ -45,9 +45,9 @@ public class MemberController {
         return ApiResponse.onSuccess(responseDto);
     }
 
-//    @DeleteMapping
-//    public ApiResponse<Void> deleteAccount() {
-//        memberService.deleteMember();
-//        return ApiResponse.onSuccess();
-//    }
+    @DeleteMapping
+    public ApiResponse<Void> deleteAccount() {
+        memberService.deleteMember();
+        return ApiResponse.onSuccess();
+    }
 }

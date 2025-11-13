@@ -1,9 +1,5 @@
 package graduation.project.DoDutch_server.domain.kakaopay.service;
 
-
-import graduation.project.DoDutch_server.domain.kakaopay.dto.PayApproveResponseDto;
-import graduation.project.DoDutch_server.domain.kakaopay.dto.PayReadyRequestDto;
-import graduation.project.DoDutch_server.domain.kakaopay.dto.PayReadyResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,9 +28,6 @@ public class KakaopayService {
     @Value("${kakaopay.secret-key}")
     private String secretKey;
 
-    @Value("${kakaopay.approval-url}")
-    private String approvalUrl;
-
     @Value("${kakaopay.cancel-url}")
     private String cancelUrl;
 
@@ -45,7 +38,7 @@ public class KakaopayService {
      * ✅ 결제 준비 요청
      */
     public Map<String, Object> ready(String partnerOrderId, String partnerUserId,
-                                     String itemName, Long totalAmount) {
+                                     String itemName, Long totalAmount, String approvalUrl) {
         String url = baseUrl + "/online/v1/payment/ready";
 
         HttpHeaders headers = new HttpHeaders();
