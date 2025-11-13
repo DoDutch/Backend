@@ -2,6 +2,7 @@ package graduation.project.DoDutch_server.domain.expense.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import graduation.project.DoDutch_server.domain.expense.dto.*;
 import graduation.project.DoDutch_server.domain.expense.service.ExpenseService;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
@@ -73,12 +74,14 @@ public class ExpenseController {
     })
     @PostMapping(value = "/{tripId}/expense", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Object> addExpense(@PathVariable("tripId") Long tripId,
-                                          @RequestBody ExpenseRequestDto expenseRequestDto
-                                          ) {
+                                          @RequestPart("data") String data,
+                                          @RequestPart(value = "image", required = false) MultipartFile image
+                                          ) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        ExpenseRequestDto expenseRequestDto = objectMapper.readValue(data, ExpenseRequestDto.class);
 
-
-
-        expenseService.addExpense(tripId, expenseRequestDto);
+        expenseService.addExpense(tripId, expenseRequestDto, image);
 
         return ApiResponse.onSuccess();
     }

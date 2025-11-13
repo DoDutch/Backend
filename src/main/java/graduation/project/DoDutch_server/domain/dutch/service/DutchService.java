@@ -95,8 +95,8 @@ public class DutchService {
             memberBalances.put(member, amountOwed);
         }
 
-        // 정산 결과 저장을 위한 리스트 생성
-        List<DutchResponseDTO> dutchResponseDTOs = new ArrayList<>();
+        // 정산 결과 저장을 위한 리스트 생성 (Dutch Entity 저장용)
+        List<Dutch> dutchEntities = new ArrayList<>();
 
         // 돈을 받아야 하는 멤버(+값)와 돈을 줘야 하는 멤버(-값) 나누어 다른 리스트에 저장하기
         List<Map.Entry<Member, Integer>> positiveBalances = new ArrayList<>();
@@ -111,7 +111,7 @@ public class DutchService {
             }
         }
 
-        // 정산 계산
+        // 정산 계산 및 Dutch Entity 생성
         for (Map.Entry<Member, Integer> positiveEntry : positiveBalances) {
             Member payee = positiveEntry.getKey();
             Integer payeeBalance = positiveEntry.getValue();
@@ -125,8 +125,19 @@ public class DutchService {
                 if (payerBalance < 0) {
                     Integer amountTopay = Math.min(payeeBalance, Math.abs(payerBalance));
 
-                    // DTO 추가
-                    dutchResponseDTOs.add(new DutchResponseDTO(payer.getId(), payee.getId(), amountTopay, false));
+                    // TripMember 가져오기
+                    TripMember tripMember = tripMemberRepository.findByTripIdAndMemberId(trip.getId(), payer.getId())
+                            .orElseThrow(() -> new IllegalArgumentException(("존재하지 않는 TripMember입니다.")));
+
+                    // Dutch Entity 생성
+                    Dutch dutch = new Dutch();
+                    dutch.setTrip(trip);
+                    dutch.setTripMember(tripMember);
+                    dutch.setPayer(payer);
+                    dutch.setPayee(payee);
+                    dutch.setPerCost(amountTopay);
+                    dutch.setIsCompleted(false);
+                    dutchEntities.add(dutch);
 
                     // 잔액 갱신
                     payeeBalance -= amountTopay;
@@ -138,26 +149,14 @@ public class DutchService {
             }
         }
 
-        for (DutchResponseDTO dutchResponseDTO : dutchResponseDTOs) {
-            Member payer = memberRepository.findById(dutchResponseDTO.getPayer())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Payer입니다."));
-            Member payee = memberRepository.findById(dutchResponseDTO.getPayee())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Payee입니다."));
+        // Dutch Entity들을 DB에 저장
+        List<Dutch> savedDutches = dutchRepository.saveAll(dutchEntities);
 
-            // TripMember 가져오기
-            TripMember tripMember = tripMemberRepository.findByTripIdAndMemberId(trip.getId(), payer.getId())
-                    .orElseThrow(() -> new IllegalArgumentException(("존재하지 않는 TripMember입니다.")));
+        // 저장된 Entity들을 DTO로 변환 (ID 포함)
+        List<DutchResponseDTO> dutchResponseDTOs = savedDutches.stream()
+                .map(DutchConverter::toDutchResponseDTO)
+                .collect(Collectors.toList());
 
-            // Dutch Entity 생성 및 저장
-            Dutch dutch = new Dutch();
-            dutch.setTrip(trip);
-            dutch.setTripMember(tripMember);
-            dutch.setPayer(payer);
-            dutch.setPayee(payee);
-            dutch.setPerCost(dutchResponseDTO.getPerCost());
-            dutch.setIsCompleted(false);
-            dutchRepository.save(dutch);
-        }
         return dutchResponseDTOs;
     }
 

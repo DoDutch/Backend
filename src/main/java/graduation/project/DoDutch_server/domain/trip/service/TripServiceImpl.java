@@ -68,8 +68,11 @@ public class TripServiceImpl implements TripService{
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
-        //이미지를 로컬에 저장후 경로 반환
-        String savedPath = saveImageToLocal(tripRequestDTO.getTripImage());
+        //이미지를 로컬에 저장후 경로 반환 (이미지가 없으면 null)
+        String savedPath = null;
+        if (tripRequestDTO.getTripImage() != null && !tripRequestDTO.getTripImage().isEmpty()) {
+            savedPath = saveImageToLocal(tripRequestDTO.getTripImage());
+        }
 
         //여행을 저장한다.
         Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode, savedPath));

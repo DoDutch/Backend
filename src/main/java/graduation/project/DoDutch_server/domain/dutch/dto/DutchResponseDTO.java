@@ -8,8 +8,19 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DutchResponseDTO {
-    private Long payer;
-    private Long payee;
+    private Long dutchId;
+    private MemberInfo payer;
+    private MemberInfo payee;
     private Integer perCost;
     private Boolean isCompleted;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberInfo {
+        private Long memberId;
+        private String nickname;
+    }
 }

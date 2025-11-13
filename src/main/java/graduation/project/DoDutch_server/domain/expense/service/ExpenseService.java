@@ -16,11 +16,15 @@ import graduation.project.DoDutch_server.global.common.apiPayload.code.status.Er
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.misc.Triple;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +39,7 @@ public class ExpenseService {
     private final ExpenseMemberRepository expenseMemberRepository;
 
 
-    public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto){
+    public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto, MultipartFile image) {
 
         // tripId로 TripMember 테이블에서 멤버 조회
         List<TripMember> tripMembers = tripMemberRepository.findByTripId(tripId);
@@ -72,6 +76,12 @@ public class ExpenseService {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
 
+        // 이미지 파일 처리 (null 허용)
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            imageUrl = saveExpenseImage(image);
+        }
+
         // Expense 저장
         Expense expense = Expense.builder()
                 .title(expenseRequestDto.getTitle())
@@ -79,11 +89,10 @@ public class ExpenseService {
                 .amount(expenseRequestDto.getAmount())
                 .expenseDate(expenseRequestDto.getExpenseDate())
                 .memo(expenseRequestDto.getMemo())
+                .expenseImageUrl(imageUrl)
                 .payer(payer)
                 .trip(trip)
                 .build();
-
-
 
         expenseRepository.save(expense);
 
@@ -105,8 +114,30 @@ public class ExpenseService {
 
             expenseMemberRepository.save(expenseMember);
         }
+    }
 
+    private String saveExpenseImage(MultipartFile image) {
+        try {
+            String uploadDir = "uploads/expenses/";
+            Path uploadPath = Paths.get(uploadDir);
 
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String originalFilename = image.getOriginalFilename();
+            String fileExtension = originalFilename != null && originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                    : "";
+            String filename = UUID.randomUUID().toString() + fileExtension;
+
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(image.getInputStream(), filePath);
+
+            return "/uploads/expenses/" + filename;
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장에 실패했습니다: " + e.getMessage());
+        }
     }
 
     @Transactional
