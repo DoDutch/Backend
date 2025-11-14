@@ -19,7 +19,7 @@ public class TripMember extends BaseEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "memberId", nullable = false)
+    @JoinColumn(name = "memberId", nullable = true)
     private Member member;
 
     @ManyToOne

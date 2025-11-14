@@ -41,12 +41,13 @@ kakaopay:
   cid: TC0ONETIME
   secret-key:  DEVC56DFA63477D6EF5019F3605DCFA06AC99F37 #개발용
   approval-url: http://localhost:8080/api/kakaopay/approve-callback
+  premium-approval-url: http://localhost:8080/auth/approve-callback
   cancel-url: http://localhost:8080/api/kakaopay/cancel-callback
   fail-url: http://localhost:8080/api/kakaopay/fail-callback
 
 # OpenAI Configuration
 openai:
-  model: gpt-5
+  model: gpt-4.1
   api:
     key: ${OPEN_AI_API_KEY}
     url: https://api.openai.com/v1/chat/completions
