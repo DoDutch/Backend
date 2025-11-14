@@ -64,6 +64,9 @@ public class TripServiceImpl implements TripService{
         //Todo: 만들어진 진짜 tripImageUrl을 toEntity의 매개변수로 넣어준다.
 
         Member currentMember = authUtils.getCurrentMember();
+        if (tripRequestDTO.getStartDate().isAfter(tripRequestDTO.getEndDate())) {
+            throw new ErrorHandler(ErrorStatus.TRIP_CREATE_FAIL);
+        }
 
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
