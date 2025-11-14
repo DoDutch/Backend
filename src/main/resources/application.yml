@@ -1,10 +1,13 @@
 # ?????? ?? ??
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     # ?? ?? DB ?? ????
-    url: jdbc:mysql://localhost:3306/dodutch
-    username: root
-    password: Rlahdduq2@
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -52,3 +55,17 @@ openai:
 # Flask Configuration
 flask:
   url: http://localhost:5000/predict
+
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: dodutch-graduation-bucket
+      path:
+        trip-main: trip-images
+        expense-main: expense-images
