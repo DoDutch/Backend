@@ -73,12 +73,13 @@ public class ExpenseController {
     })
     @PostMapping(value = "/{tripId}/expense", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Object> addExpense(@PathVariable("tripId") Long tripId,
-                                          @RequestBody ExpenseRequestDto expenseRequestDto
+                                          @RequestPart("expenseRequestDto") ExpenseRequestDto expenseRequestDto,
+                                          @RequestPart("expenseImages") List<MultipartFile> expenseImages
                                           ) {
 
 
 
-        expenseService.addExpense(tripId, expenseRequestDto);
+        expenseService.addExpense(tripId, expenseRequestDto, expenseImages);
 
         return ApiResponse.onSuccess();
     }

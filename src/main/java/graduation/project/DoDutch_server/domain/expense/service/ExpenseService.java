@@ -8,19 +8,25 @@ import graduation.project.DoDutch_server.domain.expense.repository.ExpenseMember
 import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.domain.photo.entity.Photo;
+import graduation.project.DoDutch_server.domain.photo.repository.PhotoRepository;
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.domain.trip.repository.TripMemberRepository;
 import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.global.config.aws.S3PathManager;
+import graduation.project.DoDutch_server.global.config.aws.S3Uploader;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.misc.Triple;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,9 +39,11 @@ public class ExpenseService {
     private final TripMemberRepository tripMemberRepository;
     private final MemberRepository memberRepository;
     private final ExpenseMemberRepository expenseMemberRepository;
+    private final PhotoRepository photoRepository;
+    private final S3Uploader s3Uploader;
+    private final S3PathManager s3PathManager;
 
-
-    public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto){
+    public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto, List<MultipartFile> expenseImages){
 
         // tripId로 TripMember 테이블에서 멤버 조회
         List<TripMember> tripMembers = tripMemberRepository.findByTripId(tripId);
@@ -86,6 +94,30 @@ public class ExpenseService {
 
 
         expenseRepository.save(expense);
+
+        if (expenseImages != null && !expenseImages.isEmpty()) {
+
+            for (MultipartFile image : expenseImages) {
+
+                String uuid = UUID.randomUUID().toString();
+
+                // prefix는 expenseMain
+                String keyName = s3PathManager.generateKeyName(
+                        s3PathManager.getExpenseMain(),  // prefix
+                        image,                           // 파일
+                        uuid                             // uuid
+                );
+
+                String imageUrl = s3Uploader.upload(image, keyName);
+
+                Photo photo = Photo.builder()
+                        .photoUrl(imageUrl)
+                        .expense(expense)
+                        .build();
+
+                photoRepository.save(photo);
+            }
+        }
 
         // Trip의 totalCost 업데이트
         updateTotalCost(trip, expense.getAmount());
