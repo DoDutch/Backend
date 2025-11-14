@@ -1,8 +1,9 @@
 package graduation.project.DoDutch_server.global.config.aws;
 
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class S3Uploader {
+public class S3Manager {
 
     private final AmazonS3 amazonS3;
 
@@ -44,6 +45,17 @@ public class S3Uploader {
         } catch (IOException e) {
             log.error("S3 Upload Error", e);
             throw new RuntimeException("S3 Upload Failed", e);
+        }
+    }
+
+    public void delete(String keyName) {
+        try {
+            DeleteObjectRequest request = new DeleteObjectRequest(bucket, keyName);
+            amazonS3.deleteObject(request);
+
+        } catch (AmazonServiceException e) {
+            log.error("S3 Delete Error", e);
+            throw new RuntimeException("S3 Delete Failed", e);
         }
     }
 }

@@ -27,7 +27,7 @@ public class TripConverter {
                 .budget(tripRequestDTO.getBudget())
                 .joinCode(joinCode)
                 .totalCost(0)
-                .tripImageUrl(tripImageUrl) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
+                .tripImageUrl(tripImageUrl)
                 .build();
     }
 

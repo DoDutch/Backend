@@ -1,8 +1,11 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
+import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
+import graduation.project.DoDutch_server.domain.photo.entity.Photo;
+import graduation.project.DoDutch_server.domain.photo.repository.PhotoRepository;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.FeatureDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.PredictRequestDto;
 import graduation.project.DoDutch_server.domain.trip.converter.TripMemberConverter;
@@ -18,6 +21,8 @@ import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
+import graduation.project.DoDutch_server.global.config.aws.S3PathManager;
+import graduation.project.DoDutch_server.global.config.aws.S3Manager;
 import graduation.project.DoDutch_server.global.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -43,6 +43,7 @@ public class TripServiceImpl implements TripService{
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
+    private final PhotoRepository photoRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
@@ -51,17 +52,17 @@ public class TripServiceImpl implements TripService{
     private String apiUrl;
     @Value("${flask.url}")
     private String flaskUrl;
+
     private final AuthUtils authUtils;
+    private final S3PathManager s3PathManager;
+    private final S3Manager s3Manager;
 
     /*
     여행 생성
      */
     @Transactional
     @Override
-    public Long createTrip(TripRequestDTO tripRequestDTO) throws IOException {
-        //Todo: UUID를 통해 랜덤 값을 생성해 Uuid 객체에 저장
-        //Todo: 랜덤 값을 s3 업로드 함수의 키값으로 이용해 실제 tripImageUrl을 생성
-        //Todo: 만들어진 진짜 tripImageUrl을 toEntity의 매개변수로 넣어준다.
+    public Long createTrip(TripRequestDTO tripRequestDTO) {
 
         Member currentMember = authUtils.getCurrentMember();
         if (tripRequestDTO.getStartDate().isAfter(tripRequestDTO.getEndDate())) {
@@ -72,7 +73,7 @@ public class TripServiceImpl implements TripService{
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
         //이미지를 로컬에 저장후 경로 반환
-        String savedPath = saveImageToLocal(tripRequestDTO.getTripImage());
+        String savedPath = !tripRequestDTO.getTripImage().isEmpty() ? saveImageToS3(tripRequestDTO.getTripImage()) : null;
 
         //여행을 저장한다.
         Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode, savedPath));
@@ -86,18 +87,16 @@ public class TripServiceImpl implements TripService{
     /*
     이미지 저장 및 경로 반환
      */
-    private String saveImageToLocal(MultipartFile file) throws IOException {
+    private String saveImageToS3(MultipartFile file) {
+        String uuid = UUID.randomUUID().toString();
         //저장할 이미지 경로 생성
-        String uploadDir = "C:/Users/lee07/Desktop/upload/";
-//        String uploadDir = "C:/Users/kimhy/Desktop/Backend/uploads/";
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir + fileName);
+        String keyName = s3PathManager.generateKeyName(
+                s3PathManager.getTripMain(),
+                file,
+                uuid
+        );
 
-        //디렉토리가 없으면 생성
-        Files.createDirectories(Path.of(uploadDir));
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        return filePath.toString();
+        return s3Manager.upload(file, keyName);
     }
 
     /*
@@ -256,7 +255,39 @@ public class TripServiceImpl implements TripService{
         tripMemberRepository
                 .findByTripIdAndMemberId(tripId, currentMember.getId())
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
+
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
+        if (trip.getTripImageUrl() != null)
+            deleteTripImage(trip.getTripImageUrl());
+
+        List<Expense> expenses = trip.getExpenses();
+        for (Expense expense : expenses) {
+            List<Photo> photos = photoRepository.findByExpenseId(expense.getId());
+            for (Photo photo : photos) {
+                if (photo.getPhotoUrl() != null){
+                    deleteExpenseImage(photo.getPhotoUrl());
+                }
+            }
+        }
+
         tripRepository.deleteById(tripId);
+    }
+
+    private void deleteTripImage(String imageUrl) {
+        String keyName = s3PathManager.deleteKeyName(
+                s3PathManager.getTripMain(),
+                imageUrl
+        );
+        s3Manager.delete(keyName);
+    }
+
+    private void deleteExpenseImage(String imageUrl) {
+        String keyName = s3PathManager.deleteKeyName(
+                s3PathManager.getExpenseMain(),
+                imageUrl
+        );
+        s3Manager.delete(keyName);
     }
 
     private void isPremiumMember(Long userId) {

@@ -3,7 +3,6 @@ package graduation.project.DoDutch_server.global.config.aws;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
@@ -20,5 +19,10 @@ public class S3PathManager {
         String ext = original.substring(original.lastIndexOf('.'));
 
         return prefix + "/" + uuid + ext;
+    }
+
+    public String deleteKeyName(String prefix, String fileUrl) {
+        String original = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+        return prefix + "/" + original;
     }
 }
