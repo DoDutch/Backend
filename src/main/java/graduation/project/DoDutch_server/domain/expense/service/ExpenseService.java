@@ -17,15 +17,13 @@ import graduation.project.DoDutch_server.domain.trip.repository.TripRepository;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.config.aws.S3PathManager;
-import graduation.project.DoDutch_server.global.config.aws.S3Uploader;
+import graduation.project.DoDutch_server.global.config.aws.S3Manager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.misc.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,7 +38,7 @@ public class ExpenseService {
     private final MemberRepository memberRepository;
     private final ExpenseMemberRepository expenseMemberRepository;
     private final PhotoRepository photoRepository;
-    private final S3Uploader s3Uploader;
+    private final S3Manager s3Manager;
     private final S3PathManager s3PathManager;
 
     public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto, List<MultipartFile> expenseImages){
@@ -108,7 +106,7 @@ public class ExpenseService {
                         uuid                             // uuid
                 );
 
-                String imageUrl = s3Uploader.upload(image, keyName);
+                String imageUrl = s3Manager.upload(image, keyName);
 
                 Photo photo = Photo.builder()
                         .photoUrl(imageUrl)
