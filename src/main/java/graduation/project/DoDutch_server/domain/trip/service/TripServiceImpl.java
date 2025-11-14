@@ -259,14 +259,14 @@ public class TripServiceImpl implements TripService{
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
         if (trip.getTripImageUrl() != null)
-            deleteImage(trip.getTripImageUrl());
+            deleteTripImage(trip.getTripImageUrl());
 
         List<Expense> expenses = trip.getExpenses();
         for (Expense expense : expenses) {
             List<Photo> photos = photoRepository.findByExpenseId(expense.getId());
             for (Photo photo : photos) {
                 if (photo.getPhotoUrl() != null){
-                    deleteImage(photo.getPhotoUrl());
+                    deleteExpenseImage(photo.getPhotoUrl());
                 }
             }
         }
@@ -274,9 +274,17 @@ public class TripServiceImpl implements TripService{
         tripRepository.deleteById(tripId);
     }
 
-    private void deleteImage(String imageUrl) {
+    private void deleteTripImage(String imageUrl) {
         String keyName = s3PathManager.deleteKeyName(
                 s3PathManager.getTripMain(),
+                imageUrl
+        );
+        s3Manager.delete(keyName);
+    }
+
+    private void deleteExpenseImage(String imageUrl) {
+        String keyName = s3PathManager.deleteKeyName(
+                s3PathManager.getExpenseMain(),
                 imageUrl
         );
         s3Manager.delete(keyName);
