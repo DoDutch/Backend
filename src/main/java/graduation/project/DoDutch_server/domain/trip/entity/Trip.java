@@ -37,11 +37,11 @@ public class Trip extends BaseEntity {
     private List<Expense> expenses = new ArrayList<>();
 
     public Trip updateInfo(TripUpdateRequestDTO requestDTO){
-        this.name = requestDTO.tripName();
-        this.place = requestDTO.place();
-        this.startDate = requestDTO.startDate();
-        this.endDate = requestDTO.endDate();
-        this.budget = requestDTO.budget();
+        this.name = requestDTO.getTripName();
+        this.place = requestDTO.getPlace();
+        this.startDate = requestDTO.getStartDate();
+        this.endDate = requestDTO.getEndDate();
+        this.budget = requestDTO.getBudget();
         return this;
     }
 }

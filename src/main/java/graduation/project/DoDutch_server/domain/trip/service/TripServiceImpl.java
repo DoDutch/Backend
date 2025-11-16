@@ -72,7 +72,6 @@ public class TripServiceImpl implements TripService{
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
-        //이미지를 로컬에 저장후 경로 반환
         String savedPath = !tripRequestDTO.getTripImage().isEmpty() ? saveImageToS3(tripRequestDTO.getTripImage()) : null;
 
         //여행을 저장한다.
@@ -242,6 +241,15 @@ public class TripServiceImpl implements TripService{
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
 
         trip.updateInfo(requestDTO);
+
+        if (requestDTO.getTripImage() != null && !requestDTO.getTripImage().isEmpty()) {
+            if (trip.getTripImageUrl() != null) {
+                deleteTripImage(trip.getTripImageUrl());
+            }
+
+            String savedPath = saveImageToS3(requestDTO.getTripImage());
+            trip.setTripImageUrl(savedPath);
+        }
 
     }
 
