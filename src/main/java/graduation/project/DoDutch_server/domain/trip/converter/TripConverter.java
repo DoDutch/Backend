@@ -105,6 +105,7 @@ public class TripConverter {
                 .totalCost(trip.getTotalCost())
                 .budget(trip.getBudget())
                 .tripImageUrl(trip.getTripImageUrl())
+                .joinCode(trip.getJoinCode())
                 .members(toMemberList1(trip.getTripMembers()))
                 .photos(toExpenseDtoList(trip.getExpenses()))
                 .build();
@@ -123,6 +124,7 @@ public class TripConverter {
                         .place(trip.getPlace())
                         .totalCost(trip.getTotalCost())
                         .budget(trip.getBudget())
+                        .joinCode(trip.getJoinCode())
                         .members(toMemberList2(trip.getTripMembers()))
                         .build())
                 .collect(Collectors.toList());

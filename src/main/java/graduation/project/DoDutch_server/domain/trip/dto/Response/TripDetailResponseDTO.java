@@ -24,6 +24,7 @@ public class TripDetailResponseDTO {
     private Integer totalCost;
     private Integer budget;
     private String tripImageUrl;
+    private String joinCode;
     private List<TripMemberDTO> members;
     private List<TripExpenseDTO> photos;
 

@@ -133,8 +133,8 @@ public class TripController {
     })
     public ApiResponse<TripUpdateRequestDTO> tripUpdate(
             @PathVariable("tripId") Long tripId,
-            @RequestBody TripUpdateRequestDTO requestDTO
-    ){
+            @ModelAttribute TripUpdateRequestDTO requestDTO
+    ) throws IOException {
         tripService.updateTrip(tripId, requestDTO);
         return ApiResponse.onSuccess();
     }
