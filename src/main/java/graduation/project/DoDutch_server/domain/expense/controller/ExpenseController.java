@@ -83,4 +83,23 @@ public class ExpenseController {
 
         return ApiResponse.onSuccess();
     }
+
+
+    @Operation(summary = "지출 수정 API")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @PatchMapping(value = "/{tripId}/expense/{expenseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Object> updateExpense(@PathVariable("tripId") Long tripId,
+                                             @PathVariable("expenseId") Long expenseId,
+                                             @RequestPart("expenseRequestDto") ExpenseRequestDto expenseRequestDto,
+                                             @RequestPart(value = "expenseImages", required = false) List<MultipartFile> expenseImages) {
+
+
+        expenseService.updateExpense(expenseId, expenseRequestDto, expenseImages);
+
+        return ApiResponse.onSuccess();
+    }
+
+
 }
