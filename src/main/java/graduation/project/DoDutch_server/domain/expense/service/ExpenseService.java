@@ -41,6 +41,7 @@ public class ExpenseService {
     private final S3Manager s3Manager;
     private final S3PathManager s3PathManager;
 
+    // 지출 추가
     public void addExpense(Long tripId, ExpenseRequestDto expenseRequestDto, List<MultipartFile> expenseImages){
 
         // tripId로 TripMember 테이블에서 멤버 조회
@@ -139,6 +140,137 @@ public class ExpenseService {
 
     }
 
+    //지출 수정
+    @Transactional
+    public void updateExpense(Long expenseId, ExpenseRequestDto dto, List<MultipartFile> images) {
+
+        // 1. Expense 조회
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.EXPENSE_NOT_EXIST));
+
+        Long tripId = expense.getTrip().getId();
+
+
+        // ----------------------------------------------------
+        // 2. TripMember 검증
+        // ----------------------------------------------------
+        List<Long> requiredMemberIds = tripMemberRepository.findByTripId(tripId).stream()
+                .map(tm -> tm.getMember().getId())
+                .toList();
+
+        List<Long> providedMemberIds = dto.getMembers().stream()
+                .map(ExpenseRequestDto.MemberShareDto::getMemberId)
+                .toList();
+
+        if (!(requiredMemberIds.containsAll(providedMemberIds)
+                && providedMemberIds.containsAll(requiredMemberIds))) {
+            throw new IllegalArgumentException("모든 사람의 값을 입력해라");
+        }
+
+
+        // ----------------------------------------------------
+        // 3. 금액 합계 검증 (inline)
+        // ----------------------------------------------------
+        int totalCost = dto.getMembers().stream()
+                .mapToInt(ExpenseRequestDto.MemberShareDto::getCost)
+                .sum();
+
+        if (dto.getAmount() != totalCost) {
+            throw new IllegalArgumentException("총합이 일치하지 않습니다");
+        }
+
+
+        // ----------------------------------------------------
+        // 4. payer 조회
+        // ----------------------------------------------------
+        Member payer = memberRepository.findById(dto.getPayer())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+
+        // ----------------------------------------------------
+        // 5. Expense 기본 정보 업데이트
+        // ----------------------------------------------------
+        expense.update(
+                dto.getTitle(),
+                dto.getExpenseCategory(),
+                dto.getAmount(),
+                dto.getExpenseDate(),
+                dto.getMemo(),
+                payer
+        );
+
+
+        // ----------------------------------------------------
+        // 6. 기존 ExpenseMember 삭제 후 재삽입 (inline)
+        // ----------------------------------------------------
+        expenseMemberRepository.deleteAllByExpense(expense);
+
+        for (ExpenseRequestDto.MemberShareDto m : dto.getMembers()) {
+
+            TripMember tripMember = tripMemberRepository.findByTripIdAndMemberId(tripId, m.getMemberId())
+                    .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_MEMBER_EXIST));
+
+            ExpenseMember expenseMember = ExpenseMember.builder()
+                    .expense(expense)
+                    .tripMember(tripMember)
+                    .shareAmount(m.getCost())
+                    .build();
+
+            expenseMemberRepository.save(expenseMember);
+        }
+
+
+        // ----------------------------------------------------
+        // 7. 기존 사진 삭제 (S3 + DB)
+        // ----------------------------------------------------
+        List<Photo> oldPhotos = photoRepository.findByExpense(expense);
+
+        for (Photo p : oldPhotos) {
+            // S3 삭제 → URL에서 keyName 추출
+            String url = p.getPhotoUrl();
+            String keyName = url.substring(url.indexOf(".com/") + 5);
+            s3Manager.delete(keyName);
+        }
+
+        photoRepository.deleteAll(oldPhotos);
+
+
+        // ----------------------------------------------------
+        // 8. 새 사진 업로드
+        // ----------------------------------------------------
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+
+                String uuid = UUID.randomUUID().toString();
+
+                String keyName = s3PathManager.generateKeyName(
+                        s3PathManager.getExpenseMain(),
+                        image,
+                        uuid
+                );
+
+                String imageUrl = s3Manager.upload(image, keyName);
+
+                Photo newPhoto = Photo.builder()
+                        .photoUrl(imageUrl)
+                        .expense(expense)
+                        .build();
+
+                photoRepository.save(newPhoto);
+            }
+        }
+
+
+        // ----------------------------------------------------
+        // 9. Trip totalCost 재계산 (inline)
+        // ----------------------------------------------------
+        int sum = expenseRepository.findByTripId(tripId).stream()
+                .mapToInt(Expense::getAmount)
+                .sum();
+
+        expense.getTrip().setTotalCost(sum);
+    }
+
     @Transactional
     public void updateTotalCost(Trip trip, int costDifference) {
         if (trip.getTotalCost() == null) {
@@ -207,5 +339,8 @@ public class ExpenseService {
             expense.setPayer(null);
         }
     }
+
+
+
 
 }
