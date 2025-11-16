@@ -41,4 +41,23 @@ public class Expense extends BaseEntity {
 
     @OneToMany(mappedBy = "expense", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ExpenseMember> expenseMembers = new ArrayList<>();
+
+    /**
+     *
+     * update 함수
+     */
+    public void update(String title,
+                       ExpenseCategory expenseCategory,
+                       int amount,
+                       LocalDate expenseDate,
+                       String memo,
+                       Member payer) {
+
+        this.title = title;
+        this.expenseCategory = expenseCategory;
+        this.amount = amount;
+        this.expenseDate = expenseDate;
+        this.memo = memo;
+        this.payer = payer;
+    }
 }
