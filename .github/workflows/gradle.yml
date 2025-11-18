@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main", "feat/cicd-17" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "feat/cicd-17" ]
+    branches: [ "main" ]
 
 jobs:
   build:
