@@ -11,6 +11,6 @@ import org.springframework.http.HttpStatus;
 public class ErrorReasonDTO {
     private String message;
     private String code;
-    private boolean isSuccess;
+    private boolean success;
     private HttpStatus httpStatus;
 }

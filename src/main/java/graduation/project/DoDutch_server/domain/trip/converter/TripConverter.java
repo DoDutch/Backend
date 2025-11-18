@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.converter;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
+import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripExpenseDTO;
@@ -9,6 +10,7 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDT
 import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,7 @@ public class TripConverter {
                 .budget(tripRequestDTO.getBudget())
                 .joinCode(joinCode)
                 .totalCost(0)
-                .tripImageUrl(tripImageUrl) //Todo: s3을 통해 생성된 이미지 url을 넣도록 처리
+                .tripImageUrl(tripImageUrl)
                 .build();
     }
 
@@ -45,20 +47,36 @@ public class TripConverter {
 
 
     public static List<TripMemberDTO> toMemberList1(List<TripMember> tripMembers){
-        return tripMembers.stream()
-                .map(member -> TripMemberDTO.builder()
-                        .memberId(member.getMember().getId())
-                        .nickName(member.getMember().getNickname())
-                        .build())
-                .collect(Collectors.toList());
+        List<TripMemberDTO> dtoList = new ArrayList<>();
+
+        for (TripMember tripMember : tripMembers){
+            Member member = tripMember.getMember();
+            if (member == null) dtoList.add(new TripMemberDTO(-1L, "알수없음"));
+            else dtoList.add(new TripMemberDTO(member.getId(), member.getNickname()));
+        }
+        return dtoList;
+//        return tripMembers.stream()
+//                .map(member -> TripMemberDTO.builder()
+//                        .memberId(member.getMember().getId())
+//                        .nickName(member.getMember().getNickname())
+//                        .build())
+//                .collect(Collectors.toList());
     }
 
     public static List<TripMemberDTO> toMemberList2(List<TripMember> tripMembers){
-        return tripMembers.stream()
-                .map(member -> TripMemberDTO.builder()
-                        .memberId(member.getMember().getId())
-                        .build())
-                .collect(Collectors.toList());
+        List<TripMemberDTO> dtoList = new ArrayList<>();
+
+        for (TripMember tripMember : tripMembers){
+            Member member = tripMember.getMember();
+            if (member == null) dtoList.add(new TripMemberDTO(-1L, null));
+            else dtoList.add(new TripMemberDTO(member.getId(), null));
+        }
+        return dtoList;
+//        return tripMembers.stream()
+//                .map(member -> TripMemberDTO.builder()
+//                        .memberId(member.getMember().getId())
+//                        .build())
+//                .collect(Collectors.toList());
     }
 
     public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses){
@@ -81,12 +99,13 @@ public class TripConverter {
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
                 .tripName(trip.getName())
-                .stratDate(trip.getStartDate())
+                .startDate(trip.getStartDate())
                 .endDate(trip.getEndDate())
                 .place(trip.getPlace())
                 .totalCost(trip.getTotalCost())
                 .budget(trip.getBudget())
                 .tripImageUrl(trip.getTripImageUrl())
+                .joinCode(trip.getJoinCode())
                 .members(toMemberList1(trip.getTripMembers()))
                 .photos(toExpenseDtoList(trip.getExpenses()))
                 .build();
@@ -100,11 +119,12 @@ public class TripConverter {
                 .map(trip -> TripDetailResponseDTO.builder()
                         .tripId(trip.getId())
                         .tripName(trip.getName())
-                        .stratDate(trip.getStartDate())
+                        .startDate(trip.getStartDate())
                         .endDate(trip.getEndDate())
                         .place(trip.getPlace())
                         .totalCost(trip.getTotalCost())
                         .budget(trip.getBudget())
+                        .joinCode(trip.getJoinCode())
                         .members(toMemberList2(trip.getTripMembers()))
                         .build())
                 .collect(Collectors.toList());

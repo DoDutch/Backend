@@ -21,6 +21,8 @@ public class ExpenseRequestDto {
 
     @Getter
     @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MemberShareDto {
         private Long memberId;   // 멤버 ID
         private Integer cost;    // 개인별 금액

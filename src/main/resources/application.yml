@@ -1,10 +1,13 @@
 # ?????? ?? ??
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     # ?? ?? DB ?? ????
-    url: jdbc:mysql://localhost:3306/dodutch
-    username: root
-    password: Rlahdduq2@
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -20,3 +23,56 @@ spring:
       max-request-size: 50MB
       max-file-size: 50MB
       enabled: true
+
+# Kakao OAuth2 Configuration
+kakao:
+  client-id: 10465b286770cf6059972c6fe9f6cff1
+  redirect-url: http://localhost:8080/api/users/login/oauth/kakao
+
+# JWT Configuration
+jwt:
+  secret-key: 9kL2mN5pQ8rS1tU4vW7xY0zA3bC6dE9fG2hJ5kM8nP1qR4sT7uV0wX3yZ6aB9cD
+
+server:
+  port: 8080
+
+kakaopay:
+  base-url: https://open-api.kakaopay.com
+  cid: TC0ONETIME
+  secret-key:  DEVC56DFA63477D6EF5019F3605DCFA06AC99F37 #개발용
+  approval-url: http://localhost:8080/api/kakaopay/approve-callback
+  premium-approval-url: http://localhost:8080/auth/approve-callback
+  cancel-url: http://localhost:8080/api/kakaopay/cancel-callback
+  fail-url: http://localhost:8080/api/kakaopay/fail-callback
+
+# OpenAI Configuration
+openai:
+  model: gpt-4.1
+  api:
+    key: ${OPEN_AI_API_KEY}
+    url: https://api.openai.com/v1/chat/completions
+
+# Flask Configuration
+flask:
+  url: http://localhost:5000/predict
+
+#s3
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: dodutch-graduation-bucket
+      path:
+        trip-main: trip-images
+        expense-main: expense-images
+
+
+#ocr
+clova:
+  ocr:
+    invoke-url: ${CLOVA_OCR_INVOKE_URL}
+    secret-key: ${CLOVA_OCR_SECRET_KEY}

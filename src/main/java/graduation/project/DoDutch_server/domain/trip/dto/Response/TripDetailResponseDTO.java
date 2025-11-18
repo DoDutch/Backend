@@ -13,16 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TripDetailResponseDTO {
     private Long tripId;
     private String tripName;
-    private LocalDate stratDate;
+    private LocalDate startDate;
     private LocalDate endDate;
     private String place;
     private Integer totalCost;
     private Integer budget;
     private String tripImageUrl;
+    private String joinCode;
     private List<TripMemberDTO> members;
     private List<TripExpenseDTO> photos;
 

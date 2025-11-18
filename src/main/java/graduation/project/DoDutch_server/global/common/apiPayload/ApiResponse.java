@@ -11,10 +11,10 @@ import graduation.project.DoDutch_server.global.common.apiPayload.code.status.Su
 
 @Getter
 @NoArgsConstructor
-@JsonPropertyOrder({"isSuccess", "code", "message", "data"}) // 변수 순서 지정
+@JsonPropertyOrder({"success", "code", "message", "data"}) // 변수 순서 지정
 @AllArgsConstructor
 public class ApiResponse<T> {
-    private boolean isSuccess;
+    private boolean success;
     private String code;
     private String message;
 
