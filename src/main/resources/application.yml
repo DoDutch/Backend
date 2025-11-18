@@ -54,7 +54,7 @@ openai:
 
 # Flask Configuration
 flask:
-  url: http://localhost:5000/predict
+  url: http://43.203.236.51:5000/predict
 
 #s3
 cloud:
