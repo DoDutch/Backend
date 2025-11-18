@@ -4,7 +4,6 @@ import graduation.project.DoDutch_server.domain.expense.dto.*;
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;

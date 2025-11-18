@@ -1,12 +1,9 @@
 package graduation.project.DoDutch_server.domain.expense.dto;
 
 import graduation.project.DoDutch_server.domain.expense.entity.ExpenseCategory;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter

@@ -1,0 +1,78 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Gradle cache
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
+
+      # Gradle build
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      # DockerHub Login
+      - name: DockerHub Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Docker build
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test .
+
+      # Docker push
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "[1] Pulling latest Docker image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+
+            echo "[2] Stopping old container..."
+            docker stop spring-app || true
+            docker rm spring-app || true
+
+            echo "[3] Running new container..."
+            docker run -d \
+              --name spring-app \
+              --env-file /home/ubuntu/app/.env \
+              -p 8080:8080 \
+              --restart unless-stopped \
+              ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+
+            echo "Deployment Completed Successfully!"
+
