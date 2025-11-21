@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.ocr.controller;
 
 
+import graduation.project.DoDutch_server.domain.ocr.dto.OcrResponse;
 import graduation.project.DoDutch_server.domain.ocr.dto.ReceiptItemDto;
 import graduation.project.DoDutch_server.domain.ocr.service.OcrService;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,9 +30,12 @@ public class OcrController {
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<List<ReceiptItemDto>> upload(@RequestPart("file") MultipartFile file) {
+    public ApiResponse<List<ReceiptItemDto>> upload(@RequestPart("file") MultipartFile file) throws IOException {
+
+        OcrResponse response = ocrService.requestReceiptOcr(file);
+
         return ApiResponse.onSuccess(
-                ocrService.callOcrAndParse(file)
+                ocrService.parseItems(response)
         );
     }
 }

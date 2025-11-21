@@ -72,7 +72,8 @@ cloud:
 
 
 #ocr
-clova:
-  ocr:
-    invoke-url: ${CLOVA_OCR_INVOKE_URL}
-    secret-key: ${CLOVA_OCR_SECRET_KEY}
+naver:
+  service:
+    base-url: ${NAVER_BASE_URL}
+    endpoint: ${NAVER_ENDPOINT}
+    secretKey: ${NAVER_SECRET_KEY}
