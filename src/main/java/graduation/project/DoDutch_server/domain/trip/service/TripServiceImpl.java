@@ -221,7 +221,7 @@ public class TripServiceImpl implements TripService{
 
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(()->new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
-        return TripConverter.toDetailDto(trip);
+        return TripConverter.toDetailDto(trip, photoRepository);
     }
 
     /*
@@ -313,7 +313,7 @@ public class TripServiceImpl implements TripService{
     public PredictResponseDto predictBudget(PredictRequestDto requestDto) {
 
         Long userId = AuthUtils.getCurrentMemberId();
-        isPremiumMember(userId);
+//        isPremiumMember(userId);
 
         List<Float> features = new FeatureDto().setFeatures(requestDto);
 
@@ -337,7 +337,7 @@ public class TripServiceImpl implements TripService{
             TripSuggestionRequestDto requestDto
     ){
         Long userId = AuthUtils.getCurrentMemberId();
-        isPremiumMember(userId);
+//        isPremiumMember(userId);
 
         String prompt = requestDto.place() +
                 "에서" +

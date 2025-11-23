@@ -76,9 +76,6 @@ public class ExpenseController {
                                           @RequestPart("expenseRequestDto") ExpenseRequestDto expenseRequestDto,
                                           @RequestPart("expenseImages") List<MultipartFile> expenseImages
                                           ) {
-
-
-
         expenseService.addExpense(tripId, expenseRequestDto, expenseImages);
 
         return ApiResponse.onSuccess();

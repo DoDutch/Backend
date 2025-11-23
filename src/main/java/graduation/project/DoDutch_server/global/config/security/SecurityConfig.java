@@ -48,8 +48,10 @@ public class SecurityConfig {
                         "/api-docs",
                         "/api-docs/**",
                         "/v3/api-docs/**",
-
-                        "/api/kakaopay/**"
+                        "/error",
+                        "/api/kakaopay/**",
+                        "/auth/**",
+                        "/api/auth/**"
                 ).permitAll().anyRequest().authenticated());
 
         http
@@ -70,7 +72,8 @@ public class SecurityConfig {
                 "/api-docs",
                 "/api-docs/**",
                 "/v3/api-docs/**",
-                "/auth/**"
+                "/auth/**",
+                "/api/auth/**"
         );
     }
 }

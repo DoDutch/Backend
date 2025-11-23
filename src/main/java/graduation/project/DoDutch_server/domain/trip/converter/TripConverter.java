@@ -2,6 +2,8 @@ package graduation.project.DoDutch_server.domain.trip.converter;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
+import graduation.project.DoDutch_server.domain.photo.entity.Photo;
+import graduation.project.DoDutch_server.domain.photo.repository.PhotoRepository;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripExpenseDTO;
@@ -79,23 +81,31 @@ public class TripConverter {
 //                .collect(Collectors.toList());
     }
 
-    public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses){
+    public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses, PhotoRepository photoRepository){
         return expenses.stream()
-                .map(expense -> TripExpenseDTO.builder()
-                        .photoUrl(expense.getExpenseImageUrl())
-                        .expenseDate(expense.getExpenseDate())
-                        .title(expense.getTitle())
-                        .amount(expense.getAmount())
-                        .memo(expense.getMemo())
-                        .expenseId(expense.getId())
-                        .build())
+                .map(expense -> {
+                    List<String> photoUrls = photoRepository.findByExpense(expense)
+                            .stream()
+                            .map(Photo::getPhotoUrl)
+                            .collect(Collectors.toList());
+
+                    return TripExpenseDTO.builder()
+                            .expenseId(expense.getId())
+                            .photoUrl(expense.getExpenseImageUrl())
+                            .expensePhotoUrls(photoUrls)
+                            .expenseDate(expense.getExpenseDate())
+                            .title(expense.getTitle())
+                            .amount(expense.getAmount())
+                            .memo(expense.getMemo())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
     /*
     여행 정보 조회용 dto 변환
      */
-    public static TripDetailResponseDTO toDetailDto(Trip trip){
+    public static TripDetailResponseDTO toDetailDto(Trip trip, PhotoRepository photoRepository){
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
                 .tripName(trip.getName())
@@ -106,8 +116,9 @@ public class TripConverter {
                 .budget(trip.getBudget())
                 .tripImageUrl(trip.getTripImageUrl())
                 .joinCode(trip.getJoinCode())
+                .dutchCompleted(trip.getDutchCompleted())
                 .members(toMemberList1(trip.getTripMembers()))
-                .photos(toExpenseDtoList(trip.getExpenses()))
+                .photos(toExpenseDtoList(trip.getExpenses(), photoRepository))
                 .build();
     }
 

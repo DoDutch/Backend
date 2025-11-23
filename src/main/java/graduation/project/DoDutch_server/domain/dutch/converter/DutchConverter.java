@@ -7,8 +7,15 @@ import graduation.project.DoDutch_server.domain.member.entity.Member;
 public class DutchConverter {
     public static DutchResponseDTO toDutchResponseDTO(Dutch dutch) {
         return DutchResponseDTO.builder()
-                .payer(getPayerMemberId(dutch))
-                .payee(getPayeeMemberId(dutch))
+                .dutchId(dutch.getId())
+                .payer(DutchResponseDTO.MemberInfo.builder()
+                        .memberId(dutch.getPayer().getId())
+                        .nickname(dutch.getPayer().getNickname())
+                        .build())
+                .payee(DutchResponseDTO.MemberInfo.builder()
+                        .memberId(dutch.getPayee().getId())
+                        .nickname(dutch.getPayee().getNickname())
+                        .build())
                 .perCost(dutch.getPerCost())
                 .isCompleted(dutch.getIsCompleted())
                 .build();
