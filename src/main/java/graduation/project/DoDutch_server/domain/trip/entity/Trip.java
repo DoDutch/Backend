@@ -30,6 +30,9 @@ public class Trip extends BaseEntity {
     private String joinCode;
     private String tripImageUrl;
 
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean dutchCompleted;
+
     @OneToMany(mappedBy = "trip", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TripMember> tripMembers = new ArrayList<>();
 

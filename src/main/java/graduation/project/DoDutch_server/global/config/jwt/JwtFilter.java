@@ -31,12 +31,13 @@ public class JwtFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-        logger.info("[JwtFilter] : " + httpServletRequest.getRequestURL().toString());
-
         String uri = httpServletRequest.getRequestURI();
 
-        // ✅ KakaoPay Callback은 인증 필터 무시
-        if (uri.startsWith("/api/kakaopay/")) {
+        logger.info("[JwtFilter] URI: " + uri + " | URL: " + httpServletRequest.getRequestURL().toString());
+
+        if (uri.startsWith("/api/kakaopay/") ||
+            uri.startsWith("/error") ||
+            uri.startsWith("/api/auth/")) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
