@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 public class AllExpenseByDateResponseDto {
+    private Long expenseId;
     private LocalDate date;
     private int cost;
     private String title;
