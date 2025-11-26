@@ -51,6 +51,7 @@ public class ExpenseConverter {
     public static List<AllExpenseByDateResponseDto> toAllExpenseByDateResponseDto(List<Expense> expenses){// 날짜별 전체 지출 조회 response dto
         return expenses.stream()
                 .map(expense->AllExpenseByDateResponseDto.builder()
+                        .expenseId(expense.getId())
                         .date(expense.getExpenseDate())
                         .cost(expense.getAmount())
                         .title(expense.getTitle())
