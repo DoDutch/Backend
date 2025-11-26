@@ -49,9 +49,6 @@ public class TripServiceImpl implements TripService{
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
     private final PhotoRepository photoRepository;
-    private final ExpenseRepository expenseRepository;
-    private final ExpenseMemberRepository expenseMemberRepository;
-    private final DutchRepository dutchRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
@@ -278,19 +275,9 @@ public class TripServiceImpl implements TripService{
         if (trip.getTripImageUrl() != null)// 여행 사진 삭제
             deleteTripImage(trip.getTripImageUrl());
 
-        List<TripMember> tripMemberList = trip.getTripMembers();
-        List<Dutch> dutches = dutchRepository.findByTripId(tripId);
         List<Expense> expenses = trip.getExpenses();
 
-        for (Dutch dutch : dutches) {// 정산 삭제 루프
-            dutchRepository.deleteById(dutch.getId());// 정산 삭제
-        }
-
         deleteExpense(expenses);
-
-        for (TripMember tripMember : tripMemberList) {// 여행 멤버 삭제 루프
-            tripMemberRepository.deleteById(tripMember.getId());// 여행 멤버 삭제
-        }
 
         tripRepository.deleteById(tripId);// 여행 삭제
     }
@@ -298,18 +285,13 @@ public class TripServiceImpl implements TripService{
     // 지출 삭제
     private void deleteExpense(List<Expense> expenses) {
         for (Expense expense : expenses) {// 지출 삭제 루프
-            List<ExpenseMember> expenseMembers = expense.getExpenseMembers();
             List<Photo> photos = photoRepository.findByExpenseId(expense.getId());
             for (Photo photo : photos) {// 지출 사진 삭제
                 if (photo.getPhotoUrl() != null){
                     deleteExpenseImage(photo.getPhotoUrl());
                 }
+                photoRepository.delete(photo);
             }
-            for (ExpenseMember expenseMember : expenseMembers) {// 지출 멤버 삭제
-                expenseMemberRepository.deleteById(expenseMember.getId());
-            }
-
-            expenseRepository.deleteById(expense.getId());// 지출 삭제
         }
     }
 
