@@ -1,6 +1,10 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
+import graduation.project.DoDutch_server.domain.dutch.entity.Dutch;
+import graduation.project.DoDutch_server.domain.dutch.repository.DutchRepository;
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
+import graduation.project.DoDutch_server.domain.expense.entity.ExpenseMember;
+import graduation.project.DoDutch_server.domain.expense.repository.ExpenseMemberRepository;
 import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.entity.Role;
@@ -46,6 +50,8 @@ public class TripServiceImpl implements TripService{
     private final TripMemberRepository tripMemberRepository;
     private final PhotoRepository photoRepository;
     private final ExpenseRepository expenseRepository;
+    private final ExpenseMemberRepository expenseMemberRepository;
+    private final DutchRepository dutchRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
@@ -268,23 +274,46 @@ public class TripServiceImpl implements TripService{
 
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
-        if (trip.getTripImageUrl() != null)
+
+        if (trip.getTripImageUrl() != null)// 여행 사진 삭제
             deleteTripImage(trip.getTripImageUrl());
 
+        List<TripMember> tripMemberList = trip.getTripMembers();
+        List<Dutch> dutches = dutchRepository.findByTripId(tripId);
         List<Expense> expenses = trip.getExpenses();
-        for (Expense expense : expenses) {
+
+        for (Dutch dutch : dutches) {// 정산 삭제 루프
+            dutchRepository.deleteById(dutch.getId());// 정산 삭제
+        }
+
+        deleteExpense(expenses);
+
+        for (TripMember tripMember : tripMemberList) {// 여행 멤버 삭제 루프
+            tripMemberRepository.deleteById(tripMember.getId());// 여행 멤버 삭제
+        }
+
+        tripRepository.deleteById(tripId);// 여행 삭제
+    }
+
+    // 지출 삭제
+    private void deleteExpense(List<Expense> expenses) {
+        for (Expense expense : expenses) {// 지출 삭제 루프
+            List<ExpenseMember> expenseMembers = expense.getExpenseMembers();
             List<Photo> photos = photoRepository.findByExpenseId(expense.getId());
-            for (Photo photo : photos) {
+            for (Photo photo : photos) {// 지출 사진 삭제
                 if (photo.getPhotoUrl() != null){
                     deleteExpenseImage(photo.getPhotoUrl());
                 }
             }
-            expenseRepository.deleteById(expense.getId());
-        }
+            for (ExpenseMember expenseMember : expenseMembers) {// 지출 멤버 삭제
+                expenseMemberRepository.deleteById(expenseMember.getId());
+            }
 
-        tripRepository.deleteById(tripId);
+            expenseRepository.deleteById(expense.getId());// 지출 삭제
+        }
     }
 
+    // 여행 이미지 삭제
     private void deleteTripImage(String imageUrl) {
         String keyName = s3PathManager.deleteKeyName(
                 s3PathManager.getTripMain(),
@@ -293,6 +322,7 @@ public class TripServiceImpl implements TripService{
         s3Manager.delete(keyName);
     }
 
+    // 지출 이미지 삭제
     private void deleteExpenseImage(String imageUrl) {
         String keyName = s3PathManager.deleteKeyName(
                 s3PathManager.getExpenseMain(),
