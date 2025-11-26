@@ -1,6 +1,7 @@
 package graduation.project.DoDutch_server.domain.trip.service;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
+import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
@@ -44,6 +45,7 @@ public class TripServiceImpl implements TripService{
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
     private final PhotoRepository photoRepository;
+    private final ExpenseRepository expenseRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
@@ -277,6 +279,7 @@ public class TripServiceImpl implements TripService{
                     deleteExpenseImage(photo.getPhotoUrl());
                 }
             }
+            expenseRepository.deleteById(expense.getId());
         }
 
         tripRepository.deleteById(tripId);
