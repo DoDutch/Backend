@@ -49,9 +49,6 @@ public class TripServiceImpl implements TripService{
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
     private final PhotoRepository photoRepository;
-    private final ExpenseRepository expenseRepository;
-    private final ExpenseMemberRepository expenseMemberRepository;
-    private final DutchRepository dutchRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
