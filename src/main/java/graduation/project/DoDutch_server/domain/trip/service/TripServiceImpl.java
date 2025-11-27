@@ -49,6 +49,7 @@ public class TripServiceImpl implements TripService{
     private final MemberRepository memberRepository;
     private final TripMemberRepository tripMemberRepository;
     private final PhotoRepository photoRepository;
+    private final DutchRepository dutchRepository;
     private final RestTemplate template;
 
     @Value("${openai.model}")
@@ -276,6 +277,10 @@ public class TripServiceImpl implements TripService{
             deleteTripImage(trip.getTripImageUrl());
 
         List<Expense> expenses = trip.getExpenses();
+        List<Dutch> dutches = dutchRepository.findByTripId(tripId);
+        for (Dutch dutch : dutches) {
+            dutchRepository.deleteById(dutch.getId());
+        }
 
         deleteExpense(expenses);
 
