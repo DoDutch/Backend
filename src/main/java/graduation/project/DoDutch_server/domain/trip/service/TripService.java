@@ -22,4 +22,5 @@ public interface TripService {
     TripSuggestionResponseDto recommendTrip(TripSuggestionRequestDto requestDto);
     void updateTrip(Long tripId, TripUpdateRequestDTO requestDTO);
     void deleteTrip(Long tripId);
+    void deleteMember(Long memberId);
 }

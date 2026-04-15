@@ -17,7 +17,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    /*
+    /**
      * 개인정보 조회
      */
     @GetMapping
@@ -30,7 +30,7 @@ public class MemberController {
         return ApiResponse.onSuccess(responseDto);
     }
 
-    /*
+    /**
      * 개인정보 수정
      */
     @PatchMapping
@@ -45,7 +45,14 @@ public class MemberController {
         return ApiResponse.onSuccess(responseDto);
     }
 
+    /**
+     * 계정 삭제
+     */
     @DeleteMapping
+    @Operation(summary = "계정 삭제 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<Void> deleteAccount() {
         memberService.deleteMember();
         return ApiResponse.onSuccess();
