@@ -43,7 +43,6 @@ public class Expense extends BaseEntity {
     private List<ExpenseMember> expenseMembers = new ArrayList<>();
 
     /**
-     *
      * update 함수
      */
     public void update(String title,

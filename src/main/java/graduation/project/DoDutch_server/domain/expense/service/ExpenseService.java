@@ -18,7 +18,7 @@ import graduation.project.DoDutch_server.global.common.apiPayload.code.status.Er
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.config.aws.S3PathManager;
 import graduation.project.DoDutch_server.global.config.aws.S3Manager;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -126,7 +126,7 @@ public class ExpenseService {
 
             //tripMember 객체 찾기
             TripMember tripMember = tripMemberRepository.findByTripIdAndMemberId(tripId, memberDto.getMemberId())
-                    .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_MEMBER_EXIST));
+                    .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_MEMBER_NOT_EXIST));
 
             ExpenseMember expenseMember = ExpenseMember.builder()
                     .shareAmount(memberDto.getCost())
@@ -208,7 +208,7 @@ public class ExpenseService {
         for (ExpenseRequestDto.MemberShareDto m : dto.getMembers()) {
 
             TripMember tripMember = tripMemberRepository.findByTripIdAndMemberId(tripId, m.getMemberId())
-                    .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_MEMBER_EXIST));
+                    .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_MEMBER_NOT_EXIST));
 
             ExpenseMember expenseMember = ExpenseMember.builder()
                     .expense(expense)
@@ -277,16 +277,16 @@ public class ExpenseService {
             trip.setTotalCost(0);
         }
         trip.setTotalCost(trip.getTotalCost() + costDifference);
-        tripRepository.save(trip);
     }
 
+    @Transactional(readOnly = true)
     public AllExpenseResponseDto getExpensesByTripId(Long tripId){ //전체 여행 지출 조회
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
 
         List<Expense> expenses= expenseRepository.findByTripId(tripId); //지출 기록
 
-        int budget = trip.getBudget(); //전체 예산
+        int budget = trip.getBudget() != null ? trip.getBudget() : 0; //전체 예산
         int remainingCost = (trip.getBudget() != null ? trip.getBudget() : 0) -
                 (trip.getTotalCost() != null ? trip.getTotalCost() : 0); //잔여금액
 
@@ -309,6 +309,7 @@ public class ExpenseService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<AllExpenseByDateResponseDto> getExpensesByTripIdAndDate(Long tripId){ //날짜별 여행 지출 조회
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
@@ -318,6 +319,7 @@ public class ExpenseService {
         return ExpenseConverter.toAllExpenseByDateResponseDto(expenses);
     }
 
+    @Transactional(readOnly = true)
     public ExpenseByExpenseIdResponseDto getExpenseByExpenseId(Long expenseId){
 
         Expense expense = expenseRepository.findById(expenseId)
@@ -339,8 +341,4 @@ public class ExpenseService {
             expense.setPayer(null);
         }
     }
-
-
-
-
 }
