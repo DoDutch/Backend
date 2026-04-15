@@ -3,9 +3,6 @@ package graduation.project.DoDutch_server.domain.trip.service;
 import graduation.project.DoDutch_server.domain.dutch.entity.Dutch;
 import graduation.project.DoDutch_server.domain.dutch.repository.DutchRepository;
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
-import graduation.project.DoDutch_server.domain.expense.entity.ExpenseMember;
-import graduation.project.DoDutch_server.domain.expense.repository.ExpenseMemberRepository;
-import graduation.project.DoDutch_server.domain.expense.repository.ExpenseRepository;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.entity.Role;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
@@ -41,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -63,8 +61,8 @@ public class TripServiceImpl implements TripService{
     private final S3PathManager s3PathManager;
     private final S3Manager s3Manager;
 
-    /*
-    여행 생성
+    /**
+     * 여행 생성
      */
     @Transactional
     @Override
@@ -78,7 +76,7 @@ public class TripServiceImpl implements TripService{
         //UUID를 통해 랜덤한 참여 코드 12자리를 생성한다.
         String joinCode = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
-        String savedPath = !tripRequestDTO.getTripImage().isEmpty() ? saveImageToS3(tripRequestDTO.getTripImage()) : null;
+        String savedPath = (tripRequestDTO.getTripImage() != null && !tripRequestDTO.getTripImage().isEmpty()) ? saveImageToS3(tripRequestDTO.getTripImage()) : null;
 
         //여행을 저장한다.
         Trip savedTrip = tripRepository.save(TripConverter.toEntity(tripRequestDTO, joinCode, savedPath));
@@ -89,8 +87,8 @@ public class TripServiceImpl implements TripService{
         return savedTrip.getId();
     }
 
-    /*
-    이미지 저장 및 경로 반환
+    /**
+     * 이미지 저장 및 경로 반환
      */
     private String saveImageToS3(MultipartFile file) {
         String uuid = UUID.randomUUID().toString();
@@ -104,8 +102,8 @@ public class TripServiceImpl implements TripService{
         return s3Manager.upload(file, keyName);
     }
 
-    /*
-    여행 참여
+    /**
+     * 여행 참여
      */
     @Transactional
     @Override
@@ -128,10 +126,10 @@ public class TripServiceImpl implements TripService{
         tripMemberRepository.save(tripMember);
     }
 
-    /*
-    여행 공유시 정보 조회
+    /**
+     * 여행 공유시 정보 조회
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public TripResponseDTO shareTrip(Long tripId) {
         Trip trip = tripRepository.findById(tripId)
@@ -139,11 +137,11 @@ public class TripServiceImpl implements TripService{
         return TripConverter.toDto(trip);
     }
 
-    /*
-    여행 목록 전체 조회
+    /**
+     * 여행 목록 전체 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TripDetailResponseDTO> searchTrip(String keyWord) {
         Member currentMember = authUtils.getCurrentMember();
         Long memberId = currentMember.getId();
@@ -214,11 +212,11 @@ public class TripServiceImpl implements TripService{
         return tripSet;
     }
 
-    /*
-    여행 정보 조회
+    /**
+     * 여행 정보 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public TripDetailResponseDTO detailTrip(Long tripId) {
         Member member = authUtils.getCurrentMember();
         tripMemberRepository
@@ -227,11 +225,20 @@ public class TripServiceImpl implements TripService{
 
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(()->new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
-        return TripConverter.toDetailDto(trip, photoRepository);
+
+        Map<Long, List<String>> photoUrlsMap = trip.getExpenses().stream()
+                .collect(Collectors.toMap(
+                        Expense::getId,
+                        expense -> photoRepository.findByExpense(expense).stream()
+                                .map(Photo::getPhotoUrl)
+                                .collect(Collectors.toList())
+                ));
+
+        return TripConverter.toDetailDto(trip, photoUrlsMap);
     }
 
-    /*
-    여행 수정
+    /**
+     * 여행 수정
      */
     @Override
     @Transactional
@@ -246,7 +253,13 @@ public class TripServiceImpl implements TripService{
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.TRIP_NOT_EXIST));
 
-        trip.updateInfo(requestDTO);
+        trip.updateInfo(
+                requestDTO.getTripName(),
+                requestDTO.getPlace(),
+                requestDTO.getStartDate(),
+                requestDTO.getEndDate(),
+                requestDTO.getBudget()
+        );
 
         if (requestDTO.getTripImage() != null && !requestDTO.getTripImage().isEmpty()) {
             if (trip.getTripImageUrl() != null) {
@@ -259,8 +272,8 @@ public class TripServiceImpl implements TripService{
 
     }
 
-    /*
-    여행 삭제
+    /**
+     * 여행 삭제
      */
     @Override
     @Transactional
@@ -282,13 +295,13 @@ public class TripServiceImpl implements TripService{
             dutchRepository.deleteById(dutch.getId());
         }
 
-        deleteExpense(expenses);
+        deleteExpenseImages(expenses);
 
         tripRepository.deleteById(tripId);// 여행 삭제
     }
 
-    // 지출 삭제
-    private void deleteExpense(List<Expense> expenses) {
+    // 지출 관련 S3 이미지 및 Photo 엔티티 삭제
+    private void deleteExpenseImages(List<Expense> expenses) {
         for (Expense expense : expenses) {// 지출 삭제 루프
             List<Photo> photos = photoRepository.findByExpenseId(expense.getId());
             for (Photo photo : photos) {// 지출 사진 삭제
@@ -325,8 +338,8 @@ public class TripServiceImpl implements TripService{
             throw new ErrorHandler(ErrorStatus._FORBIDDEN);
     }
 
-    /*
-    여행 경비 예측
+    /**
+     * 여행 경비 예측
      */
     @Override
     @Transactional
@@ -342,14 +355,17 @@ public class TripServiceImpl implements TripService{
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String,Object>> entity = new HttpEntity<>(body, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> response = restTemplate.postForEntity(flaskUrl, entity, Map.class);
-        Double predict = (Double) response.getBody().get("predicted_total_cost");
+        ResponseEntity<Map> response = template.postForEntity(flaskUrl, entity, Map.class);
+        Map responseBody = response.getBody();
+        if (responseBody == null || responseBody.get("predicted_total_cost") == null) {
+            throw new ErrorHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
+        Double predict = (Double) responseBody.get("predicted_total_cost");
         return new PredictResponseDto(predict.intValue()+"원");
     }
 
-    /*
-    gpt 여행지 추천
+    /**
+     * gpt 여행지 추천
      */
     @Override
     @Transactional

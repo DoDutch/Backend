@@ -10,11 +10,10 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResp
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface TripService {
-    Long createTrip(TripRequestDTO tripRequestDTO) throws IOException;
+    Long createTrip(TripRequestDTO tripRequestDTO);
     void joinTrip(TripJoinRequestDTO tripJoinRequestDTO);
     TripResponseDTO shareTrip(Long tripId);
     List<TripDetailResponseDTO> searchTrip(String keyWord);
