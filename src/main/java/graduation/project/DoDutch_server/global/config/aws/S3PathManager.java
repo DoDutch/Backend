@@ -16,7 +16,10 @@ public class S3PathManager {
 
     public String generateKeyName(String prefix, MultipartFile file, String uuid) {
         String original = file.getOriginalFilename();
-        String ext = original.substring(original.lastIndexOf('.'));
+        String ext = "";
+        if (original != null && original.lastIndexOf('.') != -1) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
 
         return prefix + "/" + uuid + ext;
     }

@@ -23,6 +23,19 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
+    private static final String[] PUBLIC_PATHS = {
+            "/swagger",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/api-docs",
+            "/api-docs/**",
+            "/v3/api-docs/**",
+            "/error",
+            "/api/kakaopay/**",
+            "/auth/**",
+            "/api/auth/**"
+    };
+
     @Bean
     public AuthenticationManager authenticationManager(
             final AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -41,18 +54,8 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
 
         http
-                .authorizeHttpRequests((auth) -> auth.requestMatchers(
-                        "/swagger",
-                        "/swagger-ui.html",
-                        "/swagger-ui/**",
-                        "/api-docs",
-                        "/api-docs/**",
-                        "/v3/api-docs/**",
-                        "/error",
-                        "/api/kakaopay/**",
-                        "/auth/**",
-                        "/api/auth/**"
-                ).permitAll().anyRequest().authenticated());
+                .authorizeHttpRequests((auth) -> auth.requestMatchers(PUBLIC_PATHS)
+                        .permitAll().anyRequest().authenticated());
 
         http
                 .addFilterBefore(new JwtFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class);
@@ -65,15 +68,6 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(
-                "/swagger",
-                "/swagger-ui.html",
-                "/swagger-ui/**",
-                "/api-docs",
-                "/api-docs/**",
-                "/v3/api-docs/**",
-                "/auth/**",
-                "/api/auth/**"
-        );
+        return (web) -> web.ignoring().requestMatchers(PUBLIC_PATHS);
     }
 }

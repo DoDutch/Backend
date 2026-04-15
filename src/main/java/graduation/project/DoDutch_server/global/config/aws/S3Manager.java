@@ -6,6 +6,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
+import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +46,7 @@ public class S3Manager {
 
         } catch (IOException e) {
             log.error("S3 Upload Error", e);
-            throw new RuntimeException("S3 Upload Failed", e);
+            throw new ErrorHandler(ErrorStatus.S3_UPLOAD_FAIL);
         }
     }
 
@@ -55,7 +57,7 @@ public class S3Manager {
 
         } catch (AmazonServiceException e) {
             log.error("S3 Delete Error", e);
-            throw new RuntimeException("S3 Delete Failed", e);
+            throw new ErrorHandler(ErrorStatus.S3_DELETE_FAIL);
         }
     }
 }

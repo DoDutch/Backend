@@ -50,7 +50,11 @@ public enum ErrorStatus implements BaseErrorCode {
     TRIP_CREATE_FAIL(HttpStatus.BAD_REQUEST, "TRIP4005", "여행 생성 실패"),
     TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "TRIP4002", "해당하는 여행 목록이 없습니다."),
     TRIP_MEMBER_EXIST(HttpStatus.BAD_REQUEST, "TRIP4003", "이미 존재하는 여행 멤버입니다."),
-    TRIP_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "TRIP4004", "존재하지 않는 여행 멤버입니다.")
+    TRIP_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "TRIP4004", "존재하지 않는 여행 멤버입니다."),
+
+    // S3 관련 응답
+    S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_5001", "파일 업로드에 실패했습니다."),
+    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_5002", "파일 삭제에 실패했습니다.")
     ;
 
     private final HttpStatus httpStatus;
