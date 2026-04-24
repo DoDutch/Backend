@@ -25,6 +25,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 15
+            --dangerously-skip-permissions
           prompt: |
             이 Pull Request의 코드 변경 사항을 리뷰해주세요.
             다음 항목을 중점적으로 확인해주세요:
@@ -32,11 +35,12 @@ jobs:
             2. 보안: JWT 처리, 인증/인가, 입력 검증
             3. JPA 성능: N+1 쿼리, cascade/fetch 설정
             4. API 설계: ResponseDTO 패턴 준수
+            
             리뷰는 한국어로 작성해주세요.
             심각한 문제만 지적하고, 사소한 스타일 이슈는 넘어가주세요.
+            
             리뷰 결과는 반드시 PR에 코멘트로 남겨주세요.
             문제를 발견하지 못한 경우에도 "검토 완료, 특이사항 없음" 코멘트를 남겨주세요.
-          claude_args: "--max-turns 15"
 
   interactive:
     if: |
@@ -56,4 +60,4 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
-          claude_args: "--max-turns 5"
+          claude_args: |

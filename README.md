@@ -17,3 +17,24 @@ commit message는 `[Type] 작성 내용` 으로 통일하기
 ### 📋 Issue 및 Branch 생성 Rule
 Issue로 코드 작성 관련 설명 작성 후, Issue Branch 생성하고 작업하기
 참고 자료 🔗 https://codesyun.tistory.com/entry/Git-Issue-%EB%B0%8F-Issue-Branch-%EC%83%9D%EC%84%B1%ED%95%98%EC%97%AC-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0
+
+### 🧪 AI 테스트 자동 생성
+
+Claude Code를 활용한 AI 기반 테스트 자동 생성 도구입니다.
+
+**사전 조건**
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) 설치 필요
+- Anthropic API 키 설정 필요
+
+**실행 방법**
+```bash
+./gradlew aiTest
+```
+
+**동작 과정**
+1. 테스트 대상 선택 (파일 경로 / 자연어 설명 / git diff)
+2. AI가 테스트 계획서 생성
+3. 사용자가 계획 검토/승인
+4. AI가 테스트 코드 생성 및 실행/검증
+
+**참고**: 개인 API 비용이 발생합니다. 계획 생성 $0.50, 테스트 생성 $3.00 예산 제한이 설정되어 있습니다.
