@@ -24,6 +24,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
           prompt: |
             이 Pull Request의 코드 변경 사항을 리뷰해주세요.
             다음 항목을 중점적으로 확인해주세요:
@@ -55,4 +56,5 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
           claude_args: "--max-turns 5"
