@@ -64,6 +64,12 @@ src/main/java/graduation/project/DoDutch_server/
 - 패키지 구조는 `src/main/java`와 미러링
 - 소스 패키지명 그대로 사용: `graduation.project.DoDutch_server.*`
 
+### ⚠️ macOS 패키지명 주의사항
+- macOS는 case-insensitive 파일시스템이므로 `DoDutch_server`와 `dodutch_server`가 같은 디렉토리로 취급됨
+- 테스트 패키지는 반드시 `graduation.project.DoDutch_server`로 작성 (대문자 D 주의)
+- 임의의 패키지명(예: `trip.converter`)으로 우회하지 말 것 — 반드시 프로덕션 코드와 동일한 패키지 사용
+- 테스트 파일 생성 후 `package` 선언이 디렉토리 경로와 정확히 일치하는지 확인
+
 ### 네이밍
 - `@DisplayName`에 한글 사용 (예: `"여행 생성 시 시작일이 종료일 이후면 예외 발생"`)
 - 메서드명: `should_기대동작_when_조건` 패턴
