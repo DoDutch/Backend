@@ -147,3 +147,9 @@ replay_pid*
 .env
 !gradle/wrapper/gradle-wrapper.jar
 
+# AI Test Orchestrator
+.ai-test/last-plan.md
+
+# Claude Code 로컬 설정
+.claude/
+
