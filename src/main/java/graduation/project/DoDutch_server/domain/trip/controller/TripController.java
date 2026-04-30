@@ -5,20 +5,22 @@ import graduation.project.DoDutch_server.domain.trip.dto.Response.PredictRespons
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripSuggestionRequestDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripSuggestionResponseDto;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
+import graduation.project.DoDutch_server.domain.trip.service.TripService;
 import io.swagger.v3.oas.annotations.Operation;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripJoinRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripResponseDTO;
-import graduation.project.DoDutch_server.domain.trip.service.TripServiceImpl;
 import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 @RestController
@@ -26,23 +28,32 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Trip", description = "여행 관련 API")
 public class TripController {
-    private final TripServiceImpl tripService;
+    private final TripService tripService;
 
-    /*
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(MultipartFile.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(null);
+            }
+        });
+    }
+
+    /**
      * 여행 생성
      */
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "여행 생성 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) throws IOException { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
-
+    public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) {
         Long tripId = tripService.createTrip(tripRequestDTO);
         return ApiResponse.onSuccess(tripId);
     }
 
-    /*
+    /**
      * 여행 참여
      */
     @PostMapping("/join")
@@ -56,7 +67,7 @@ public class TripController {
         return ApiResponse.onSuccess();
     }
 
-    /*
+    /**
      * 여행 공유 시 정보 조회
      */
     @GetMapping("/share/{tripId}")
@@ -69,7 +80,7 @@ public class TripController {
         return ApiResponse.onSuccess(tripResponseDTO);
     }
 
-    /*
+    /**
      * 여행 검색
      */
     @GetMapping("/search")
@@ -82,7 +93,7 @@ public class TripController {
         return ApiResponse.onSuccess(responseDTOList);
     }
 
-    /*
+    /**
      * 여행별 조회
      */
     @GetMapping("/{tripId}")
@@ -95,7 +106,7 @@ public class TripController {
         return ApiResponse.onSuccess(tripDetailResponseDTO);
     }
 
-    /*
+    /**
      * 여행 경비 예측
      */
     @PostMapping("/predict")
@@ -108,7 +119,7 @@ public class TripController {
         return ApiResponse.onSuccess(responseDto);
     }
 
-    /*
+    /**
      * gpt 여행지 추천
      */
     @PostMapping("/chat")
@@ -123,23 +134,23 @@ public class TripController {
         return ApiResponse.onSuccess(responseDto);
     }
 
-    /*
+    /**
      * 여행 수정
      */
-    @PatchMapping("/{tripId}")
+    @PatchMapping(value = "/{tripId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "여행 수정 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<TripUpdateRequestDTO> tripUpdate(
+    public ApiResponse<Void> tripUpdate(
             @PathVariable("tripId") Long tripId,
             @ModelAttribute TripUpdateRequestDTO requestDTO
-    ) throws IOException {
+    ) {
         tripService.updateTrip(tripId, requestDTO);
         return ApiResponse.onSuccess();
     }
 
-    /*
+    /**
      * 여행 삭제
      */
     @DeleteMapping("/{tripId}")
@@ -147,7 +158,7 @@ public class TripController {
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<TripUpdateRequestDTO> tripDelete(
+    public ApiResponse<Void> tripDelete(
             @PathVariable("tripId") Long tripId
     ){
         tripService.deleteTrip(tripId);

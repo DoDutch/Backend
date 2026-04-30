@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.GeneralException;
 
@@ -19,20 +18,19 @@ import java.util.Random;
 
 @Slf4j
 @Component
-@Service
 public class JwtTokenProvider implements InitializingBean {
 
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60;            // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
 
     private final String secretKey; // Jwt 시크릿 키
-    private static Key key;
+    private Key key;
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         this.secretKey = secretKey;
     }
 
-    /*
+    /**
      * 비밀키를 Base64 인코딩하고 다시 키로 변환하여 저장
      */
     @Override
@@ -40,7 +38,7 @@ public class JwtTokenProvider implements InitializingBean {
         this.key = getKeyFromBase64EncodedKey(encodeBase64SecretKey(secretKey));
     }
 
-    //여기서 payload는 멤버의 socialId
+    // 여기서 payload는 멤버의 socialId
     public String createAccessToken(String payload) {
         return createToken(payload, ACCESS_TOKEN_EXPIRE_TIME);
     }
@@ -64,7 +62,7 @@ public class JwtTokenProvider implements InitializingBean {
                 .compact();
     }
 
-    /*
+    /**
      * 페이로드 추출
      */
     public String getPayload(String token) {

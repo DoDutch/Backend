@@ -23,7 +23,14 @@ import java.io.IOException;
 public class AuthController {
     private final AuthService authService;
 
+    /**
+     * 카카오 로그인 (웹)
+     */
     @PostMapping("/kakao/login")
+    @Operation(summary = "카카오 로그인 API (웹)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<KakaoResponseDTO> login(@RequestBody KakaoRequestDTO kakaoRequestDTO,
                                                HttpServletResponse response) {
         KakaoResponseDTO kakaoResponseDTO = authService.loginWithKakao(kakaoRequestDTO.getAccessCode(), response);
@@ -35,22 +42,38 @@ public class AuthController {
      */
     @PostMapping("/kakao/login-token")
     @Operation(summary = "카카오 로그인 (모바일 SDK 액세스 토큰)", description = "모바일 앱에서 카카오 SDK로 획득한 액세스 토큰으로 로그인")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<KakaoResponseDTO> loginWithToken(@RequestBody KakaoRequestDTO kakaoRequestDTO,
                                                         HttpServletResponse response) {
         KakaoResponseDTO kakaoResponseDTO = authService.loginWithKakaoToken(kakaoRequestDTO.getAccessToken(), response);
         return ApiResponse.onSuccess(kakaoResponseDTO);
     }
 
+    /**
+     * 회원가입
+     */
     @PostMapping("/signup")
     @Operation(summary = "회원가입 API", description = "카카오 로그인 후 닉네임 설정하여 회원가입")
-    public ApiResponse<Object> signup(@RequestBody SignupRequestDTO signupRequestDTO,
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<Void> signup(@RequestBody SignupRequestDTO signupRequestDTO,
                                       @RequestHeader("Authorization") String authHeader) {
         String accessToken = authHeader.replace("Bearer ", "");
         authService.signup(signupRequestDTO, accessToken);
         return ApiResponse.onSuccess();
     }
 
+    /**
+     * 토큰 갱신
+     */
     @PostMapping("/refresh-token")
+    @Operation(summary = "토큰 갱신 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<RefreshResponseDTO> refreshToken(@RequestBody RefreshRequestDTO refreshRequestDTO,
                                                      HttpServletResponse response) {
         RefreshResponseDTO refreshResponseDTO = authService.refreshAccessToken(refreshRequestDTO);
@@ -62,13 +85,17 @@ public class AuthController {
      * 카카오 OAuth 과정 없이 kakaoId로 바로 JWT 토큰 발급
      */
     @PostMapping("/dev-login")
+    @Operation(summary = "개발 전용 로그인 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<KakaoResponseDTO> devLogin(@RequestParam String kakaoId) {
         log.info("[DEV] Development login requested for kakaoId: {}", kakaoId);
         KakaoResponseDTO response = authService.createTokensForDev(kakaoId);
         return ApiResponse.onSuccess(response);
     }
 
-    /*
+    /**
      * 닉네임 중복 확인
      */
     @PostMapping("/check-nickname")
@@ -81,7 +108,14 @@ public class AuthController {
         return ApiResponse.onSuccess();
     }
 
+    /**
+     * 프리미엄 결제 준비
+     */
     @PostMapping("/premium")
+    @Operation(summary = "프리미엄 결제 준비 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
     public ApiResponse<PayPremiumReadyResponseDto> premium(
             @RequestBody PayPremiumReadyRequestDto requestDto
     ) {
@@ -89,7 +123,11 @@ public class AuthController {
         return ApiResponse.onSuccess(responseDto);
     }
 
+    /**
+     * 프리미엄 결제 승인 콜백
+     */
     @GetMapping("/approve-callback")
+    @Operation(summary = "프리미엄 결제 승인 콜백 API")
     public void approve(
             @RequestParam("partner_order_id") String partnerOrderId,
             @RequestParam("pg_token") String pgToken,

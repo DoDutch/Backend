@@ -40,7 +40,6 @@ import graduation.project.DoDutch_server.global.common.apiPayload.code.status.Er
 import graduation.project.DoDutch_server.global.common.exception.GeneralException;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -51,6 +50,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaopayService kakaopayService;
     private final PaymentOrderRepository  paymentOrderRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -68,8 +68,6 @@ public class AuthService {
 
         KakaoMemberAndExistDTO kakaoMemberAndExistDTO = getUserProfileByToken(accessToken);
 
-        Optional<Member> findMember = memberRepository.findById(kakaoMemberAndExistDTO.getMember().getId());
-
         return getKakaoTokens(kakaoMemberAndExistDTO.getMember().getKakaoId(), kakaoMemberAndExistDTO.isExistingMember(), response);
     }
 
@@ -84,8 +82,6 @@ public class AuthService {
         try {
             // OAuth 인증 코드 교환 과정을 건너뛰고 직접 액세스 토큰 사용
             KakaoMemberAndExistDTO kakaoMemberAndExistDTO = getUserProfileByToken(accessToken);
-
-            Optional<Member> findMember = memberRepository.findById(kakaoMemberAndExistDTO.getMember().getId());
 
             KakaoResponseDTO result = getKakaoTokens(kakaoMemberAndExistDTO.getMember().getKakaoId(),
                                                      kakaoMemberAndExistDTO.isExistingMember(),
@@ -114,8 +110,7 @@ public class AuthService {
 
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
-        RestTemplate rt = new RestTemplate();
-        ResponseEntity<String> response = rt.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 "https://kauth.kakao.com/oauth/token",
                 HttpMethod.POST,
                 kakaoTokenRequest,
@@ -124,14 +119,23 @@ public class AuthService {
 
         // HTTP 응답 (JSON) -> 액세스 토큰 파싱
         String responseBody = response.getBody();
+        if (responseBody == null) {
+            throw new GeneralException(ErrorStatus.KAKAO_API_ERROR);
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = null;
+        JsonNode jsonNode;
         try {
             jsonNode = objectMapper.readTree(responseBody);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new GeneralException(ErrorStatus.KAKAO_API_ERROR);
         }
-        return jsonNode.get("access_token").asText(); //토큰 전송
+
+        JsonNode accessTokenNode = jsonNode.get("access_token");
+        if (accessTokenNode == null) {
+            throw new GeneralException(ErrorStatus.KAKAO_API_ERROR);
+        }
+        return accessTokenNode.asText(); //토큰 전송
     }
 
     // 카카오 API 호출해서 AccessToken으로 유저정보 가져오기(id)
@@ -175,15 +179,15 @@ public class AuthService {
 
         boolean existMember = false;
 
-        if(memberRepository.findByKakaoId(member.getKakaoId()) != null) //DB에 회원정보 있으면 existMember = True
+        Member findMember = memberRepository.findByKakaoId(member.getKakaoId()); //DB에 회원정보 조회
+        if(findMember != null) //DB에 회원정보 있으면 existMember = True
         {
             existMember = true;
         }
         else {
-            memberRepository.save(member); //DB에 회원정보 없으면 저장
+            findMember = memberRepository.save(member); //DB에 회원정보 없으면 저장
         }
 
-        Member findMember = memberRepository.findByKakaoId(kakaoInfoDto.getKakaoId());
         return KakaoMemberAndExistDTO.builder()
                 .member(findMember)
                 .isExistingMember(existMember)
@@ -279,7 +283,7 @@ public class AuthService {
     }
 
     // 닉네임 중복 확인
-    @Transactional
+    @Transactional(readOnly = true)
     public void checkNickname(NicknameRequestDto requestDto) {
         String nickname = requestDto.nickname();
         if (nickname == null || nickname.isEmpty()) {

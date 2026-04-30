@@ -9,11 +9,11 @@ import graduation.project.DoDutch_server.domain.member.dto.request.MemberUpdateR
 import graduation.project.DoDutch_server.domain.member.dto.response.MemberResponseDto;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
 import graduation.project.DoDutch_server.domain.member.repository.MemberRepository;
-import graduation.project.DoDutch_server.domain.trip.service.TripServiceImpl;
+import graduation.project.DoDutch_server.domain.trip.service.TripService;
 import graduation.project.DoDutch_server.global.common.apiPayload.code.status.ErrorStatus;
 import graduation.project.DoDutch_server.global.common.exception.handler.ErrorHandler;
 import graduation.project.DoDutch_server.global.util.AuthUtils;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +24,11 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AuthService authService;
-    private final TripServiceImpl tripService;
+    private final TripService tripService;
     private final ExpenseService expenseService;
     private final DutchService dutchService;
 
+    @Transactional(readOnly = true)
     public MemberResponseDto getMember() {
         Member currentMember = getCurrentMember();
         return MemberConverter.toMemberResponseDto(currentMember);

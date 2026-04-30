@@ -12,6 +12,5 @@ public class ExpenseByExpenseIdResponseDto {
     private LocalDate expenseDate;
     private String title;
     private int amount;
-    private String expenseImage;
     private String memo;
 }

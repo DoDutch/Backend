@@ -2,8 +2,6 @@ package graduation.project.DoDutch_server.domain.trip.converter;
 
 import graduation.project.DoDutch_server.domain.expense.entity.Expense;
 import graduation.project.DoDutch_server.domain.member.entity.Member;
-import graduation.project.DoDutch_server.domain.photo.entity.Photo;
-import graduation.project.DoDutch_server.domain.photo.repository.PhotoRepository;
 import graduation.project.DoDutch_server.domain.trip.dto.Request.TripRequestDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripDetailResponseDTO;
 import graduation.project.DoDutch_server.domain.trip.dto.Response.TripExpenseDTO;
@@ -13,12 +11,14 @@ import graduation.project.DoDutch_server.domain.trip.entity.Trip;
 import graduation.project.DoDutch_server.domain.trip.entity.TripMember;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TripConverter {
-    /*
-    Dto를 Entity로 변환
+    /**
+     * Dto를 Entity로 변환
      */
     public static Trip toEntity(TripRequestDTO tripRequestDTO, String joinCode ,String tripImageUrl) {
         return Trip.builder()
@@ -33,8 +33,8 @@ public class TripConverter {
                 .build();
     }
 
-    /*
-    Entity를 Dto로 변환
+    /**
+     * Entity를 Dto로 변환
      */
     public static TripResponseDTO toDto(Trip trip){
         return TripResponseDTO.builder()
@@ -81,31 +81,23 @@ public class TripConverter {
 //                .collect(Collectors.toList());
     }
 
-    public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses, PhotoRepository photoRepository){
+    public static List<TripExpenseDTO> toExpenseDtoList(List<Expense> expenses, Map<Long, List<String>> photoUrlsMap){
         return expenses.stream()
-                .map(expense -> {
-                    List<String> photoUrls = photoRepository.findByExpense(expense)
-                            .stream()
-                            .map(Photo::getPhotoUrl)
-                            .collect(Collectors.toList());
-
-                    return TripExpenseDTO.builder()
-                            .expenseId(expense.getId())
-                            .photoUrl(expense.getExpenseImageUrl())
-                            .expensePhotoUrls(photoUrls)
-                            .expenseDate(expense.getExpenseDate())
-                            .title(expense.getTitle())
-                            .amount(expense.getAmount())
-                            .memo(expense.getMemo())
-                            .build();
-                })
+                .map(expense -> TripExpenseDTO.builder()
+                        .expenseId(expense.getId())
+                        .expensePhotoUrls(photoUrlsMap.getOrDefault(expense.getId(), Collections.emptyList()))
+                        .expenseDate(expense.getExpenseDate())
+                        .title(expense.getTitle())
+                        .amount(expense.getAmount())
+                        .memo(expense.getMemo())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    /*
-    여행 정보 조회용 dto 변환
+    /**
+     * 여행 정보 조회용 dto 변환
      */
-    public static TripDetailResponseDTO toDetailDto(Trip trip, PhotoRepository photoRepository){
+    public static TripDetailResponseDTO toDetailDto(Trip trip, Map<Long, List<String>> photoUrlsMap){
         return TripDetailResponseDTO.builder()
                 .tripId(trip.getId())
                 .tripName(trip.getName())
@@ -118,12 +110,12 @@ public class TripConverter {
                 .joinCode(trip.getJoinCode())
                 .dutchCompleted(trip.getDutchCompleted())
                 .members(toMemberList1(trip.getTripMembers()))
-                .photos(toExpenseDtoList(trip.getExpenses(), photoRepository))
+                .photos(toExpenseDtoList(trip.getExpenses(), photoUrlsMap))
                 .build();
     }
 
-    /*
-    여행목록 조회용 dto 변환
+    /**
+     * 여행목록 조회용 dto 변환
      */
     public static List<TripDetailResponseDTO> toDetailListDto(List<Trip> trips){
         return trips.stream()

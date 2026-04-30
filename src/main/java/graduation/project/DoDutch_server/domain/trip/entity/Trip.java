@@ -1,6 +1,5 @@
 package graduation.project.DoDutch_server.domain.trip.entity;
 
-import graduation.project.DoDutch_server.domain.trip.dto.Request.TripUpdateRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -39,12 +38,11 @@ public class Trip extends BaseEntity {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Expense> expenses = new ArrayList<>();
 
-    public Trip updateInfo(TripUpdateRequestDTO requestDTO){
-        this.name = requestDTO.getTripName();
-        this.place = requestDTO.getPlace();
-        this.startDate = requestDTO.getStartDate();
-        this.endDate = requestDTO.getEndDate();
-        this.budget = requestDTO.getBudget();
-        return this;
+    public void updateInfo(String name, String place, LocalDate startDate, LocalDate endDate, Integer budget){
+        if (name != null) this.name = name;
+        if (place != null) this.place = place;
+        if (startDate != null) this.startDate = startDate;
+        if (endDate != null) this.endDate = endDate;
+        if (budget != null) this.budget = budget;
     }
 }
