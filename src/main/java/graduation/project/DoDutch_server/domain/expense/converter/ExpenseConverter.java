@@ -71,7 +71,6 @@ public class ExpenseConverter {
                 .expenseDate(expense.getExpenseDate())
                 .title(expense.getTitle())
                 .amount(expense.getAmount())
-                .expenseImage(expense.getExpenseImageUrl())
                 .memo(expense.getMemo())
                 .build();
     }

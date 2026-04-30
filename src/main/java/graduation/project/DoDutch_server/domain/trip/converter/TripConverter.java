@@ -85,7 +85,6 @@ public class TripConverter {
         return expenses.stream()
                 .map(expense -> TripExpenseDTO.builder()
                         .expenseId(expense.getId())
-                        .photoUrl(expense.getExpenseImageUrl())
                         .expensePhotoUrls(photoUrlsMap.getOrDefault(expense.getId(), Collections.emptyList()))
                         .expenseDate(expense.getExpenseDate())
                         .title(expense.getTitle())
