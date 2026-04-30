@@ -15,8 +15,12 @@ import graduation.project.DoDutch_server.global.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 @RestController
@@ -26,16 +30,25 @@ import java.util.List;
 public class TripController {
     private final TripService tripService;
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(MultipartFile.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(null);
+            }
+        });
+    }
+
     /**
      * 여행 생성
      */
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "여행 생성 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) { //아마존 연결 후 RequestBody를 @ModelAttribute 수정
-
+    public ApiResponse<Long> tripRegister(@ModelAttribute TripRequestDTO tripRequestDTO) {
         Long tripId = tripService.createTrip(tripRequestDTO);
         return ApiResponse.onSuccess(tripId);
     }
@@ -124,7 +137,7 @@ public class TripController {
     /**
      * 여행 수정
      */
-    @PatchMapping("/{tripId}")
+    @PatchMapping(value = "/{tripId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "여행 수정 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")

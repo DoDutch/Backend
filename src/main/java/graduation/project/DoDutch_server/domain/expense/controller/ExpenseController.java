@@ -64,7 +64,16 @@ public class ExpenseController {
     }
 
 
-    @Operation(summary = "지출 생성 API")
+    @Operation(summary = "지출 생성 API",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            encoding = @io.swagger.v3.oas.annotations.media.Encoding(
+                                    name = "expenseRequestDto",
+                                    contentType = MediaType.APPLICATION_JSON_VALUE
+                            )
+                    )
+            )
+    )
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
@@ -79,7 +88,16 @@ public class ExpenseController {
     }
 
 
-    @Operation(summary = "지출 수정 API")
+    @Operation(summary = "지출 수정 API",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            encoding = @io.swagger.v3.oas.annotations.media.Encoding(
+                                    name = "expenseRequestDto",
+                                    contentType = MediaType.APPLICATION_JSON_VALUE
+                            )
+                    )
+            )
+    )
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
